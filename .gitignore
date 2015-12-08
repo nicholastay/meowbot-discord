@@ -1,0 +1,10 @@
+# node
+npm-debug.log
+node_modules
+
+# Mac
+.DS_Store
+
+config.iced
+music/*.mp3
+handlers/Local.iced

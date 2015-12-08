@@ -1,0 +1,21 @@
+{
+  "name": "meowbot-discord",
+  "version": "1.0.0",
+  "description": "Some bot for discord",
+  "main": "bot.iced",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Nicholas Tay <nexerq@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^1.1.1",
+    "discord.io": "^1.4.13",
+    "fast-strftime": "^1.1.1",
+    "iced-coffee-script": "^108.0.9",
+    "node-opus": "^0.1.11",
+    "request": "^2.67.0",
+    "seedrandom": "^2.4.2",
+    "ytdl-core": "^0.7.8"
+  }
+}
