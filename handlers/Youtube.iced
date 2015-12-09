@@ -16,5 +16,5 @@ handler = exports.Command = (command, tail, message, client) ->
 
 playYTLink = (videoId, client) ->
     client.voiceConnection.stopPlaying()
-    videoData = ytdl("http://www.youtube.com/watch?v=#{videoId}", {quality: 'lowest'})
+    videoData = ytdl("http://www.youtube.com/watch?v=#{videoId}", {quality: 140})
     client.voiceConnection.playRawStream videoData

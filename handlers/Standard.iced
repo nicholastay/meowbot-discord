@@ -4,4 +4,4 @@ handler = exports.Message = (message, client) ->
             client.sendMessage message, 'meow~', {tts: true}
 
         when '~meowbot'
-            client.sendMessage message, 'hello! Did you call me? :P'
+            client.reply message, 'hello! Did you call me? :P'

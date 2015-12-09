@@ -6,5 +6,6 @@ node_modules
 .DS_Store
 
 config.iced
+commands.json
 music/*.mp3
 handlers/Local.iced

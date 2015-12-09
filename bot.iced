@@ -20,6 +20,9 @@ reloadHandler = (handler) ->
     if typeof handl.Command is 'function'
         commandHandlers[handlerName] = handl.Command
         console.log 'Loaded comeownd handler: ' + handlerName
+    if typeof handl.Init is 'function'
+        handl.Init()
+        console.log 'Ran inyatialization script for: ' + handlerName
 
 reloadHandlers = ->
     messageHandlers = {}
@@ -47,8 +50,14 @@ replS = repl.start
     prompt: 'Meow> '
 console.log '\n'
 
+logOffDiscord = ->
+    discord.logout ->
+        console.log 'Logged out of Discord.'
+        process.exit()
+
 replS.context.discord = discord
 replS.context.ch = commandHandlers
 replS.context.mh = messageHandlers
 replS.context.rh = reloadHandlers
 replS.context.r = reloadHandler
+replS.context.dc = logOffDiscord
