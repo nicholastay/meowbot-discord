@@ -1,19 +1,26 @@
 DiscordJS = require 'discord.js'
 repl = require 'repl'
 fs = require 'fs'
-config = require './config'
 
-discord = new DiscordJS.Client()
+Meowbot = global.Meowbot = new class
+    constructor: ->
+        @Config = {}
+        @Discord = null
 
-unloadFromNode = (fileName) ->
-    delete require.cache[require.resolve(fileName)] if require.cache[require.resolve(fileName)]
-
+config = Meowbot.Config = require './config'
+discord = Meowbot.Discord = new DiscordJS.Client()
 messageHandlers = {}
 commandHandlers = {}
-reloadHandler = (handler) ->
-    handlerName = handler.replace '.iced', ''
-    unloadFromNode './handlers/' + handler
-    handl = require './handlers/' + handler
+
+unloadHandler = (handlerName) ->
+    delete messageHandlers[handlerName] if messageHandlers[handlerName]
+    delete commandHandlers[handlerName] if commandHandlers[handlerName]
+    if require.cache[require.resolve("./handlers/#{handlerName}.iced")]
+        delete require.cache[require.resolve("./handlers/#{handlerName}.iced")]
+        console.log 'Unloaded handler: ' + handlerName
+
+loadHandler = (handlerName) ->
+    handl = require './handlers/' + handlerName
     if typeof handl.Message is 'function'
         messageHandlers[handlerName] = handl.Message
         console.log 'Loaded meowssage handler: ' + handlerName
@@ -24,40 +31,54 @@ reloadHandler = (handler) ->
         handl.Init()
         console.log 'Ran inyatialization script for: ' + handlerName
 
-reloadHandlers = ->
-    messageHandlers = {}
-    commandHandlers = {}
-    for handler in fs.readdirSync './handlers' then reloadHandler handler
-    console.log 'Handlers successfully (re)loaded'
+reloadHandler = (handlerName, firstRun) ->
+    unloadHandler handlerName if not firstRun # No need to do this for first run
+    loadHandler handlerName
 
-reloadHandlers()
+reloadHandlers = (firstRun) ->
+    for handler in fs.readdirSync './handlers' then reloadHandler handler.replace('.iced', ''), firstRun
+    return console.log 'Handlers successfully reloaded.' if not firstRun
+    console.log 'Handlers successfully loaded.'
+
+reloadHandlers(true)
 
 discord.on 'ready', ->
     console.log 'Logged in to Discord.'
     discord.setStatus 'online', 452
 
 discord.on 'message', (message) ->
-    for handlerName, handler of messageHandlers then handler(message, discord)
+    for handlerName, handler of messageHandlers then handler(message)
 
     tail = message.content.split ' '
     command = tail.shift().toLowerCase()
     tail = tail.join ' '
-    for handlerName, handler of commandHandlers then handler(command, tail, message, discord)
-
-discord.login config.discord.username, config.discord.password
-
-replS = repl.start
-    prompt: 'Meow> '
-console.log '\n'
+    for handlerName, handler of commandHandlers then handler(command, tail, message) 
 
 logOffDiscord = ->
     discord.logout ->
         console.log 'Logged out of Discord.'
         process.exit()
+    console.log 'Logging off Discord...'
+
+reloadConfig = ->
+    Meowbot.Config = config = {}
+    unloadFromNode './config'
+    config = Meowbot.Config = require './config'
+    console.log 'Config reloaded.'
+
+replS = repl.start
+    prompt: 'Meow> '
+console.log '\n'
 
 replS.context.discord = discord
+replS.context.d = discord
 replS.context.ch = commandHandlers
 replS.context.mh = messageHandlers
 replS.context.rh = reloadHandlers
 replS.context.r = reloadHandler
+replS.context.rc = reloadConfig
+replS.context.l = loadHandler
+replS.context.u = unloadHandler
 replS.context.dc = logOffDiscord
+
+discord.login config.discord.username, config.discord.password
