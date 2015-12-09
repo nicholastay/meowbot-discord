@@ -10,7 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "chalk": "^1.1.1",
-    "discord.io": "^1.4.13",
+    "discord.js": "^5.1.0",
     "fast-strftime": "^1.1.1",
     "iced-coffee-script": "^108.0.9",
     "node-opus": "^0.1.11",
