@@ -1,5 +1,6 @@
 path = require 'path'
 fs = require 'fs'
+config = require '../config'
 
 commands = {}
 commandsSaveFile = path.join __dirname, '../', 'commands.json'
@@ -9,10 +10,11 @@ init = exports.Init = ->
         commands = JSON.parse fs.readFileSync commandsSaveFile
 
 handler = exports.Command = (command, tail, message, client) ->
-    if commands[command] then return client.sendMessage message, commands[command].output
+    if commands[command] and message.author.id isnt client.user.id then return client.sendMessage message, commands[command].output
 
     switch command
         when '~addcom'
+            return client.reply message, 'you\'re not one of my masters, you can\'t tell me what to do! >.<' if not userIsMod message
             return if not tail
             output = tail.split ' '
             return if output.length < 2
@@ -27,6 +29,7 @@ handler = exports.Command = (command, tail, message, client) ->
             client.reply message, 'command most likely has been added...'
 
         when '~delcom'
+            return client.reply message, 'you\'re not one of my masters, you can\'t tell me what to do! >.<' if not userIsMod message
             return if not tail
             output = tail.split ' '
             return if output.length < 1
@@ -36,5 +39,8 @@ handler = exports.Command = (command, tail, message, client) ->
             saveCommands()
             client.reply message, 'command most likely has been removed...'
 
+userIsMod = (message) ->
+    if message.author.id in config.admins or message.author.id in config.mods then return true
+    return false
 
 saveCommands = -> fs.writeFileSync commandsSaveFile, JSON.stringify(commands), 'utf8'
