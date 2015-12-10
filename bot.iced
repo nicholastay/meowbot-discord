@@ -6,11 +6,13 @@ Meowbot = global.Meowbot = new class
     constructor: ->
         @Config = {}
         @Discord = null
+        @Tools = {}
 
-config = Meowbot.Config = require './config'
 discord = Meowbot.Discord = new DiscordJS.Client()
 messageHandlers = {}
 commandHandlers = {}
+config = {}
+tools = {}
 
 unloadHandler = (handlerName) ->
     delete messageHandlers[handlerName] if messageHandlers[handlerName]
@@ -40,6 +42,20 @@ reloadHandlers = (firstRun) ->
     return console.log 'Handlers successfully reloaded.' if not firstRun
     console.log 'Handlers successfully loaded.'
 
+reloadConfig = ->
+    config = Meowbot.Config = {}
+    delete require.cache[require.resolve('./config')] if require.cache[require.resolve('./config')]
+    config = Meowbot.Config = require './config'
+    console.log 'Config (re)loaded.'
+
+reloadTools = ->
+    tools = Meowbot.Tools = {}
+    delete require.cache[require.resolve('./tools')] if require.cache[require.resolve('./tools')]
+    tools = Meowbot.Tools = require './tools'
+    console.log 'Tools (re)loaded.'
+
+reloadConfig()
+reloadTools()
 reloadHandlers(true)
 
 discord.on 'ready', ->
@@ -61,12 +77,6 @@ logOffDiscord = ->
         process.exit()
     console.log 'Logging off Discord...'
 
-reloadConfig = ->
-    Meowbot.Config = config = {}
-    unloadFromNode './config'
-    config = Meowbot.Config = require './config'
-    console.log 'Config reloaded.'
-
 replS = repl.start
     prompt: 'Meow> '
 console.log '\n'
@@ -78,6 +88,7 @@ replS.context.mh = messageHandlers
 replS.context.rh = reloadHandlers
 replS.context.r = reloadHandler
 replS.context.rc = reloadConfig
+replS.context.rt = reloadTools
 replS.context.l = loadHandler
 replS.context.u = unloadHandler
 replS.context.dc = logOffDiscord

@@ -13,7 +13,7 @@ handler = exports.Command = (command, tail, message) ->
 
     switch command
         when '~addcom'
-            return Meowbot.Discord.reply message, 'you\'re not one of my masters, you can\'t tell me what to do! >.<' if not userIsMod message
+            return Meowbot.Discord.reply message, 'you\'re not one of my masters, you can\'t tell me what to do! >.<' if not Meowbot.Tools.userIsMod message
             return if not tail
             output = tail.split ' '
             return if output.length < 2
@@ -28,7 +28,7 @@ handler = exports.Command = (command, tail, message) ->
             Meowbot.Discord.reply message, 'command most likely has been added...'
 
         when '~delcom'
-            return Meowbot.Discord.reply message, 'you\'re not one of my masters, you can\'t tell me what to do! >.<' if not userIsMod message
+            return Meowbot.Discord.reply message, 'you\'re not one of my masters, you can\'t tell me what to do! >.<' if not Meowbot.Tools.userIsMod message
             return if not tail
             output = tail.split ' '
             return if output.length < 1
@@ -37,9 +37,5 @@ handler = exports.Command = (command, tail, message) ->
             delete commands[commandToDel]
             saveCommands()
             Meowbot.Discord.reply message, 'command most likely has been removed...'
-
-userIsMod = (message) ->
-    if message.author.id in Meowbot.Config.admins or message.author.id in Meowbot.Config.mods then return true
-    return false
 
 saveCommands = -> fs.writeFileSync commandsSaveFile, JSON.stringify(commands), 'utf8'

@@ -1,0 +1,46 @@
+endsWith = require 'lodash.endswith'
+userTagRegex = /<@([0-9]+)>/
+
+handler = exports.Command = (command, tail, message) ->
+    switch command
+        when '~setcolor'
+            return Meowbot.Discord.reply message, 'you\'re not one of my masters, you\'re not special enough (^:' if not Meowbot.Tools.userIsMod message
+
+            tailSplit = tail.split ' '
+            color = tailSplit[0]
+            userToLookup = tailSplit[1]
+            return Meowbot.Discord.reply message, 'invalid color (should be a hex color code, for example #FF0000).' if tail[0] isnt '#' or color.length isnt 7
+            server = message.channel.server
+            if not userToLookup
+                # didnt define a user
+                user = message.author
+            else
+                # defined a user
+                userTagMatch = userTagRegex.exec userToLookup
+                return Meowbot.Discord.reply message, 'invalid user, please define user with the @tag in Discord. :)' if not userTagMatch
+                userLookup = server.members.filter (member) -> return member.id is userTagMatch[1]
+                return Meowbot.Discord.reply message, 'invalid user of this server. >.<' if not userLookup.length > 0
+                user = userLookup[0]
+
+            baseRoleName = 'customcolor_' + user.id
+            existingRole = server.roles.filter (role) -> return endsWith role.name, baseRoleName
+            if existingRole.length > 0
+                # Role already exists
+                role = existingRole[0]
+                await Meowbot.Discord.updateRole role,
+                    color: parseInt(color.replace '#', '0x')
+                , defer err
+                return Meowbot.Discord.reply message, 'there was an error updating the color, please try again later. :(' if err
+                return Meowbot.Discord.reply message, "you have updated <@#{user.id}>'s color. :P" if userToLookup
+                Meowbot.Discord.reply message, 'your color has been updated :D'
+            else
+                # Create the role
+                await Meowbot.Discord.createRole server,
+                    color: parseInt(color.replace '#', '0x')
+                    name: user.username + '#' + baseRoleName
+                    permissions: []
+                , defer err, role
+                return Meowbot.Discord.reply message, 'there was an error setting the new color, please try again later. :(' if err
+                Meowbot.Discord.addMemberToRole user, role
+                return Meowbot.Discord.reply message, "you have set <@#{user.id}>'s color. :P" if userToLookup
+                Meowbot.Discord.reply message, 'your new color has been set! Welcome to the kool kids kawaii gang! :D'
