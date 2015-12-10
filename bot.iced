@@ -7,17 +7,21 @@ Meowbot = global.Meowbot = new class
         @Config = {}
         @Discord = null
         @Tools = {}
+        @AudioQueue = []
 
 discord = Meowbot.Discord = new DiscordJS.Client()
 messageHandlers = {}
 commandHandlers = {}
+handlerIntervals = {}
 config = {}
 tools = {}
 
 unloadHandler = (handlerName) ->
-    delete messageHandlers[handlerName] if messageHandlers[handlerName]
-    delete commandHandlers[handlerName] if commandHandlers[handlerName]
     if require.cache[require.resolve("./handlers/#{handlerName}.iced")]
+        delete messageHandlers[handlerName] if messageHandlers[handlerName]
+        delete commandHandlers[handlerName] if commandHandlers[handlerName]
+        clearInterval i for i in handlerIntervals[handlerName] if handlerIntervals[handlerName]
+        delete handlerIntervals[handlerName] if handlerIntervals[handlerName]
         delete require.cache[require.resolve("./handlers/#{handlerName}.iced")]
         console.log 'Unloaded handler: ' + handlerName
 
@@ -32,6 +36,9 @@ loadHandler = (handlerName) ->
     if typeof handl.Init is 'function'
         handl.Init()
         console.log 'Ran inyatialization script for: ' + handlerName
+    if handl.Intervals?
+        handlerIntervals[handlerName] = handl.Intervals
+        console.log 'Loaded intermeows for: ' + handlerName
 
 reloadHandler = (handlerName, firstRun) ->
     unloadHandler handlerName if not firstRun # No need to do this for first run
