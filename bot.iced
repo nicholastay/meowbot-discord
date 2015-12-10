@@ -7,7 +7,7 @@ Meowbot = global.Meowbot = new class
         @Config = {}
         @Discord = null
         @Tools = {}
-        @AudioQueue = []
+        @HandlerSettings = {} # Persistent handler settings across reloads
 
 discord = Meowbot.Discord = new DiscordJS.Client()
 messageHandlers = {}
