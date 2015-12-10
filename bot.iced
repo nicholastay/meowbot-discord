@@ -47,12 +47,13 @@ discord.on 'ready', ->
     discord.setStatus 'online', 452
 
 discord.on 'message', (message) ->
-    for handlerName, handler of messageHandlers then handler(message)
+    isPM = message.channel instanceof DiscordJS.PMChannel
+    for handlerName, handler of messageHandlers then handler(message, isPM)
 
     tail = message.content.split ' '
     command = tail.shift().toLowerCase()
     tail = tail.join ' '
-    for handlerName, handler of commandHandlers then handler(command, tail, message) 
+    for handlerName, handler of commandHandlers then handler(command, tail, message, isPM) 
 
 logOffDiscord = ->
     discord.logout ->
