@@ -1,9 +1,10 @@
 endsWith = require 'lodash.endswith'
 userTagRegex = /<@([0-9]+)>/
 
-handler = exports.Command = (command, tail, message) ->
+handler = exports.Command = (command, tail, message, isPM) ->
     switch command
         when '~setcolor'
+            return Meowbot.Discord.sendMessage message, 'This command can only be used in the context of a server.' if isPM
             return Meowbot.Discord.reply message, 'you\'re not one of my masters, you\'re not special enough (^:' if not Meowbot.Tools.userIsMod message
 
             tailSplit = tail.split ' '
@@ -44,3 +45,24 @@ handler = exports.Command = (command, tail, message) ->
                 Meowbot.Discord.addMemberToRole user, role
                 return Meowbot.Discord.reply message, "you have set <@#{user.id}>'s color. :P" if userToLookup
                 Meowbot.Discord.reply message, 'your new color has been set! Welcome to the kool kids kawaii gang! :D'
+
+
+
+        when '~setrolecolor'
+            return Meowbot.Discord.sendMessage message, 'This command can only be used in the context of a server.' if isPM
+            return Meowbot.Discord.reply message, 'you\'re not one of my masters, you\'re not special enough (^:' if not Meowbot.Tools.userIsMod message
+
+            roleName = tail.split ' '
+            color = roleName.shift()
+            roleName = roleName.join ' '
+            return Meowbot.Discord.reply message, 'invalid color (should be a hex color code, for example #FF0000).' if tail[0] isnt '#' or color.length isnt 7
+            server = message.channel.server
+            role = server.roles.filter (r) -> return r.name is roleName
+            return Meowbot.Discord.reply message, 'invalid role for this server.' if not role.length > 0
+            role = role[0]
+
+            await Meowbot.Discord.updateRole role,
+                color: parseInt(color.replace '#', '0x')
+            , defer err
+            return Meowbot.Discord.reply message, 'there was an error updating the role\'s color, please try again later. :(' if err
+            Meowbot.Discord.reply message, 'the role\'s color has been updated :D'
