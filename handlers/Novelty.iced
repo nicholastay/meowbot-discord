@@ -1,5 +1,4 @@
 seedrandom = require 'seedrandom'
-getRandomInt = (min, max) -> return Math.floor(Math.random() * (max - min)) + min # https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
 
 ballResponses = ['it is certain',
                  'it is decidedly so',
@@ -32,4 +31,4 @@ handler = exports.Command = (command, tail, message) ->
 
         when '~8ball'
             return if not tail
-            return Meowbot.Discord.reply message, "my magic 8-ball says... #{ballResponses[getRandomInt 0, ballResponses.length]}."
+            return Meowbot.Discord.reply message, "my magic 8-ball says... #{ballResponses[Meowbot.Tools.getRandomInt 0, ballResponses.length]}."
