@@ -5,9 +5,12 @@ path = require 'path'
 
 delay = (ms, cb) -> setTimeout cb, ms # convenience flip func
 
+requestLimit = 10
+
 init = exports.Init = ->
     Meowbot.HandlerSettings.Audio = {} if not Meowbot.HandlerSettings.Audio
     Meowbot.HandlerSettings.Audio.Queue = [] if not Meowbot.HandlerSettings.Audio.Queue?
+    Meowbot.HandlerSettings.Audio.NowPlaying = null if not Meowbot.HandlerSettings.Audio.NowPlaying?
     Meowbot.HandlerSettings.Audio.LastMS = -1 if not Meowbot.HandlerSettings.Audio.LastMS?
     Meowbot.HandlerSettings.Audio.Stopped = true if not Meowbot.HandlerSettings.Audio.Stopped?
 
@@ -38,6 +41,29 @@ handler = exports.Command = (command, tail, message) ->
             Meowbot.Discord.reply message, 'forcing skip on current song due to your demand...'
             Meowbot.Discord.voiceConnection.stopPlaying() # This will trigger skipSong without hitting it twice
 
+        when '~np'
+            return Meowbot.Discord.reply message, 'there is currently nothing playing...' if not Meowbot.HandlerSettings.Audio.NowPlaying
+            Meowbot.Discord.reply message, "**Now Playing**: #{Meowbot.HandlerSettings.Audio.NowPlaying.name} (requested by: #{Meowbot.HandlerSettings.Audio.NowPlaying.requestBy})"
+
+        when '~listenqueue'
+            return Meowbot.Discord.reply message, 'there is currently no listen queue...' if not Meowbot.HandlerSettings.Audio.NowPlaying
+            listenQueue = 'the current listening queue is as follows: \n'
+            listenQueue += "**NP**: #{Meowbot.HandlerSettings.Audio.NowPlaying.name} (requested by: #{Meowbot.HandlerSettings.Audio.NowPlaying.requestBy})"
+            listenQueue += '\n*(there is nothing else in the queue...)*' if Meowbot.HandlerSettings.Audio.Queue.length < 1
+            counter = 1
+            for song in Meowbot.HandlerSettings.Audio.Queue
+                listenQueue += "\n**    #{counter}**: #{song.name} (requested by: #{song.requestBy})"
+                counter++
+            return Meowbot.Discord.reply message, listenQueue
+
+        when '~leavevoice'
+            return if not Meowbot.Tools.userIsMod message or not Meowbot.Tools.userIsMod message
+            Meowbot.HandlerSettings.Audio.NowPlaying = null if Meowbot.HandlerSettings.Audio.NowPlaying
+            if Meowbot.HandlerSettings.Audio.Queue.length > 0
+                Meowbot.HandlerSettings.Audio.Queue = []
+                Meowbot.Discord.reply message, '*(the listening queue has also been cleared)*'
+                Meowbot.Discord.voiceConnection.stopPlaying()
+
 checkIfStoppedPlaying = ->
     return if not Meowbot.Discord.voiceConnection or Meowbot.HandlerSettings.Audio.Stopped is true
     if Meowbot.HandlerSettings.Audio.LastMS is Meowbot.Discord.voiceConnection.streamTime
@@ -58,6 +84,7 @@ intervals = exports.Intervals = [setInterval((-> checkIfStoppedPlaying()), 1000)
 
 # Queueing stuff
 addToQueue = (friendlyName, message, stream) ->
+    return Meowbot.Discord.reply message, 'the listening queue is currently full, please try again later.' if Meowbot.HandlerSettings.Audio.Queue.length > requestLimit
     Meowbot.HandlerSettings.Audio.Queue.push
         name: friendlyName
         requestBy: "<@#{message.author.id}>"
@@ -70,8 +97,11 @@ onStoppedPlaying = ->
 
 skipSong = ->
     Meowbot.Discord.voiceConnection.stopPlaying()
-    return Meowbot.Discord.sendMessage Meowbot.HandlerSettings.Audio.OriginalMessageCtx, 'There are no more items in the queue, playblack has now stopped.' if Meowbot.HandlerSettings.Audio.Queue < 1
+    if Meowbot.HandlerSettings.Audio.Queue < 1
+        Meowbot.HandlerSettings.Audio.NowPlaying = null
+        return Meowbot.Discord.sendMessage Meowbot.HandlerSettings.Audio.OriginalMessageCtx, 'There are no more items in the queue, playblack has now stopped.'
     nowPlaying = Meowbot.HandlerSettings.Audio.Queue.shift()
+    Meowbot.HandlerSettings.Audio.NowPlaying = nowPlaying
     delay 1500, -> Meowbot.Discord.sendMessage Meowbot.HandlerSettings.Audio.OriginalMessageCtx, "**Now Playing**: #{nowPlaying.name} (requested by: #{nowPlaying.requestBy})"
     startTrackingStopped(Meowbot.HandlerSettings.Audio.OriginalMessageCtx)
     Meowbot.Discord.voiceConnection.playRawStream nowPlaying.stream
