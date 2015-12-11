@@ -97,11 +97,9 @@ onStoppedPlaying = ->
 
 skipSong = ->
     Meowbot.Discord.voiceConnection.stopPlaying()
-    if Meowbot.HandlerSettings.Audio.Queue < 1
-        Meowbot.HandlerSettings.Audio.NowPlaying = null
-        return Meowbot.Discord.sendMessage Meowbot.HandlerSettings.Audio.OriginalMessageCtx, 'There are no more items in the queue, playblack has now stopped.'
     nowPlaying = Meowbot.HandlerSettings.Audio.Queue.shift()
     Meowbot.HandlerSettings.Audio.NowPlaying = nowPlaying
+    return Meowbot.Discord.sendMessage Meowbot.HandlerSettings.Audio.OriginalMessageCtx, 'There are no more items in the queue, playblack has now stopped.' if not nowPlaying
     delay 1500, -> Meowbot.Discord.sendMessage Meowbot.HandlerSettings.Audio.OriginalMessageCtx, "**Now Playing**: #{nowPlaying.name} (requested by: #{nowPlaying.requestBy})"
     startTrackingStopped(Meowbot.HandlerSettings.Audio.OriginalMessageCtx)
     Meowbot.Discord.voiceConnection.playRawStream nowPlaying.stream
