@@ -17,8 +17,8 @@ handler = exports.Command = (command, tail, message, isPM) ->
             Meowbot.Discord.leaveVoiceChannel()
             return Meowbot.Discord.reply message, 'I left voice on your request.'
 
-        when '~stopplaying'
-            return Meowbot.Discord.reply message, 'you\'re not one of my masters, I can scream whenever I want.\n (hint: just mute me if you\'re that much of a bitch)' if not Meowbot.Tools.userIsMod message
-            return Meowbot.Discord.reply message, 'you baka baka, I\'m not currently in a voice channel q.q' if not Meowbot.Discord.voiceConnection
-            Meowbot.Discord.voiceConnection.stopPlaying()
-            return Meowbot.Discord.reply message, 'if there was any music, I stopped it.'
+        # when '~stopplaying'
+        #     return Meowbot.Discord.reply message, 'you\'re not one of my masters, I can scream whenever I want.\n (hint: just mute me if you\'re that much of a bitch)' if not Meowbot.Tools.userIsMod message
+        #     return Meowbot.Discord.reply message, 'you baka baka, I\'m not currently in a voice channel q.q' if not Meowbot.Discord.voiceConnection
+        #     Meowbot.Discord.voiceConnection.stopPlaying()
+        #     return Meowbot.Discord.reply message, 'if there was any music, I stopped it.'
