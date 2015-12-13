@@ -4,3 +4,9 @@ module.exports =
     discord:
         username: ''
         password: ''
+    localtunnel:
+        port: 27369
+        subdomain: 'sendmygithubhooks' # subdomain.localtunnel.me for your webhook tunnel on github
+    githubwebhook:
+        disabled: true # just dont use this feature or some shit if its too advanced
+        secret: '' # secret from github webhook
