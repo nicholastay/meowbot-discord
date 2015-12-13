@@ -37,7 +37,7 @@ init = exports.Init = ->
             branch = Meowbot.Tools.strRightBack ref, '/'
             repo_fullname = data.repository['full_name']
             output_msg = "**Updates from GitHub (#{repo_fullname}) - #{data.commits.length} commits pushed**"
-            output_msg += "\n[#{repo}/#{branch} #{commit.id.substring 0, 7}] #{commit.message} ~ #{commit.author.username} (#{commit.author.name})" for commit in data.commits
+            output_msg += "\n**[#{repo}/#{branch} #{commit.id.substring 0, 7}]** #{commit.message.split('\n')[0]} ~ #{commit.author.username} (#{commit.author.name})" for commit in data.commits
             Meowbot.Discord.sendMessage Meowbot.HandlerSettings.GithubWebhook.messageCtx, output_msg
 
 handler = exports.Command = (command, tail, message, isPM) ->
