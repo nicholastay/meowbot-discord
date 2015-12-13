@@ -3,7 +3,7 @@ gameIds = [452, 453, 305, 514, 515]
 
 gameList = require __dirname + '/../node_modules/discord.js/ref/gameMap' # just have to reference like this... not sure how reliable.
 
-intervals = exports.Intervals = [setInterval((-> changePlayingGame()), 10 * 60 * 1000)] # per 10 min change
+intervals = exports.Intervals = [setInterval((-> changePlayingGameRand()), 10 * 60 * 1000)] # per 10 min change
 
 changePlayingGame = (gameId) -> Meowbot.Discord.setStatus 'online', gameId
 changePlayingGameRand = -> changePlayingGame gameIds[Meowbot.Tools.getRandomInt(0, gameIds.length)]

@@ -100,4 +100,8 @@ replS.context.l = loadHandler
 replS.context.u = unloadHandler
 replS.context.dc = logOffDiscord
 
+# Global error handler
+process.on 'uncaughtException', (err) ->
+    console.log 'GLOBAL ERROR M8: ' + err
+
 discord.login config.discord.username, config.discord.password

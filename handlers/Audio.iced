@@ -58,27 +58,30 @@ handler = exports.Command = (command, tail, message) ->
 
         when '~leavevoice'
             return if not Meowbot.Tools.userIsMod message or not Meowbot.Tools.userIsMod message
-            Meowbot.HandlerSettings.Audio.NowPlaying = null if Meowbot.HandlerSettings.Audio.NowPlaying
-            if Meowbot.HandlerSettings.Audio.Queue.length > 0
-                Meowbot.HandlerSettings.Audio.Queue = []
-                Meowbot.Discord.reply message, '*(the listening queue has also been cleared)*'
-                Meowbot.Discord.voiceConnection.stopPlaying()
+            Meowbot.HandlerSettings.Audio.OriginalMessageCtx = null
+            clearQueue message
+
+        when '~clearqueue'
+            return Meowbot.Discord.reply message, 'you\'re not one of my masters, you can\'t tell me what to do! >.<' if not Meowbot.Tools.userIsMod message
+            clearQueue message
 
 checkIfStoppedPlaying = ->
     return if not Meowbot.Discord.voiceConnection or Meowbot.HandlerSettings.Audio.Stopped is true
+    return if Meowbot.Discord.voiceConnection.streamTime is 0
     if Meowbot.HandlerSettings.Audio.LastMS is Meowbot.Discord.voiceConnection.streamTime
         Meowbot.HandlerSettings.Audio.LastMS = -1
         Meowbot.HandlerSettings.Audio.Stopped = true
         return onStoppedPlaying()
     Meowbot.HandlerSettings.Audio.LastMS = Meowbot.Discord.voiceConnection.streamTime # if the streamTime is equal to LastMS then it stopped playing, so we have to store it and check
 
-startTrackingStopped = (message) ->
-    delay 3000, ->
+startTrackingStopped = ->
+    delay 3500, ->
         Meowbot.HandlerSettings.Audio.Stopped = false
-        Meowbot.HandlerSettings.Audio.OriginalMessageCtx = message
 
 getYtStream = (videoId) ->
-   return ytdl("http://www.youtube.com/watch?v=#{videoId}", {quality: 140})
+    data = ytdl("http://www.youtube.com/watch?v=#{videoId}", {quality: 140})
+    data.on 'response', (resp) ->
+        return data
 
 intervals = exports.Intervals = [setInterval((-> checkIfStoppedPlaying()), 1000)]
 
@@ -89,17 +92,27 @@ addToQueue = (friendlyName, message, stream) ->
         name: friendlyName
         requestBy: "<@#{message.author.id}>"
         stream: stream
-    Meowbot.Discord.reply message, "I have added #{friendlyName} to the listening queue."
-    skipSong() if Meowbot.HandlerSettings.Audio.Stopped is true
+    Meowbot.Discord.reply message, "I have added **#{friendlyName}** to the listening queue."
+    delay 3500, -> skipSong() if Meowbot.HandlerSettings.Audio.Stopped is true # delay for some processing... ffmpeg is slow sometimes
 
 onStoppedPlaying = ->
     skipSong()
+
+clearQueue = (message) ->
+    Meowbot.HandlerSettings.Audio.NowPlaying = null if Meowbot.HandlerSettings.Audio.NowPlaying
+    if Meowbot.HandlerSettings.Audio.Queue.length > 0
+        Meowbot.HandlerSettings.Audio.Queue = []
+        Meowbot.Discord.voiceConnection.stopPlaying()
+        Meowbot.Discord.sendMessage message, '*(the listening queue has been cleared)*'
 
 skipSong = ->
     Meowbot.Discord.voiceConnection.stopPlaying()
     nowPlaying = Meowbot.HandlerSettings.Audio.Queue.shift()
     Meowbot.HandlerSettings.Audio.NowPlaying = nowPlaying
     return Meowbot.Discord.sendMessage Meowbot.HandlerSettings.Audio.OriginalMessageCtx, 'There are no more items in the queue, playblack has now stopped.' if not nowPlaying
-    delay 1500, -> Meowbot.Discord.sendMessage Meowbot.HandlerSettings.Audio.OriginalMessageCtx, "**Now Playing**: #{nowPlaying.name} (requested by: #{nowPlaying.requestBy})"
-    startTrackingStopped(Meowbot.HandlerSettings.Audio.OriginalMessageCtx)
-    Meowbot.Discord.voiceConnection.playRawStream nowPlaying.stream
+    await Meowbot.Discord.sendMessage Meowbot.HandlerSettings.Audio.OriginalMessageCtx, "**Now Playing**: #{nowPlaying.name} (requested by: #{nowPlaying.requestBy})", defer whatever # delay for encoding as well
+    startTrackingStopped()
+    try
+        Meowbot.Discord.voiceConnection.playRawStream nowPlaying.stream
+    catch e
+        Meowbot.Discord.sendMessage Meowbot.HandlerSettings.Audio.OriginalMessageCtx, "There was an **error** with playing the song, I don\'t know exactly why, but the show must go on!... (please forward this error message to Nexerq: #{e})"
