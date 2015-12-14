@@ -2,7 +2,7 @@ path = require 'path'
 fs = require 'fs'
 
 commands = {}
-commandsSaveFile = path.join __dirname, '../', 'commands.json'
+commandsSaveFile = path.join __dirname, '../', '/config', 'Commands.json'
 
 init = exports.Init = ->
     if fs.statSync commandsSaveFile # If file exists

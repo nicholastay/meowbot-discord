@@ -1,0 +1,35 @@
+{
+	"folders":
+	[
+		{
+			"path": "config",
+            "name": "Configs"
+		},
+        {
+            "path": "internal",
+            "name": "Internal Resources"
+        },
+        {
+            "path": "handlers",
+            "name": "Message Handlers"
+        },
+        {
+            "path": ".",
+            "folder_exclude_patterns": ["*"],
+            "name": "Root folder"
+        }
+	],
+    "settings":
+    {
+        "tab_size": 4,
+        "translate_tabs_to_spaces": true
+    },
+    "build_systems":
+    [
+        {
+            "name": "IcedCoffeeScript",
+            "selector": "*.iced",
+            "cmd": ["./node_modules/.bin/iced", "$file"],
+        }
+    ]
+}

@@ -13,31 +13,32 @@ init = exports.Init = ->
             port: port
             subdomain: Meowbot.Config.localtunnel.subdomain
         , (err, tunnel) ->
-            return console.log '[GitHub Webhook] error opening tunnel to localtunnel.me, error msg: ' + err if err
+            return Meowbot.Logging.modLog 'GitHub Webhook', 'error opening tunnel to localtunnel.me, error msg: ' + err if err
             Meowbot.HandlerSettings.GithubWebhook.tunnel = tunnel # store tunnel in case we need it or something, also to detect if already have a client
-            console.log '[GitHub Webhook] localtunnel.me tunnel open, url at: ' + tunnel.url
+            Meowbot.Logging.modLog 'GitHub Webhook', 'localtunnel.me tunnel open, url at: ' + tunnel.url
             tunnel.on 'error', (err) ->
                 Meowbot.HandlerSettings.GithubWebhook.tunnel = null
-                console.log '[GitHub Webhook] localtunnel.me tunnel error, error: ' + err
+                Meowbot.Logging.modLog 'GitHub Webhook', 'localtunnel.me tunnel error, error: ' + err
 
     # The actual webhook
     if not Meowbot.HandlerSettings.GithubWebhook.hook
         logger =
-            log: (data) -> console.log '[GitHub Webhook] GithubHook: ' + data
-            error: (data) -> console.log '[GitHub Webhook] GithubHook <ERROR>: ' + data
+            log: (data) -> Meowbot.Logging.modLog 'GitHub Webhook', 'GithubHook: ' + data
+            error: (data) -> Meowbot.Logging.modLog 'GitHub Webhook', 'GithubHook <ERROR>: ' + data
         github = Meowbot.HandlerSettings.GithubWebhook.hook = githubhook
             port: Meowbot.Config.localtunnel.port
             path: '/'
             secret: Meowbot.Config.githubwebhook.secret
             logger: logger
         github.listen()
-        console.log '[GitHub Webhook] Now listening for GitHub webhook events on port: ' + port
+        Meowbot.Logging.modLog 'GitHub Webhook', 'Now listening for GitHub webhook events on port: ' + port
         github.on 'push', (repo, ref, data) ->
             return if not Meowbot.HandlerSettings.GithubWebhook.messageCtx # No channel aka message context to send updates to
             branch = Meowbot.Tools.strRightBack ref, '/'
             repo_fullname = data.repository['full_name']
             output_msg = "**Updates from GitHub (#{repo_fullname}) - #{data.commits.length} commits pushed**"
             output_msg += "\n**[#{repo}/#{branch} #{commit.id.substring 0, 7}]** #{commit.message.split('\n')[0]} ~ #{commit.author.username} (#{commit.author.name})" for commit in data.commits
+            output_msg += "\n***(you can view the full commit history for branch #{branch} here: http://github.com/#{repo_fullname}/commits/#{branch})***"
             Meowbot.Discord.sendMessage Meowbot.HandlerSettings.GithubWebhook.messageCtx, output_msg
 
 handler = exports.Command = (command, tail, message, isPM) ->

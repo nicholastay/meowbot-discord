@@ -5,7 +5,10 @@ node_modules
 # Mac
 .DS_Store
 
-config.iced
-commands.json
+# Sublime
+*.sublime-workspace
+
+config/config.iced
+config/commands.json
 music/*.mp3
 handlers/Local.iced
