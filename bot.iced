@@ -20,9 +20,15 @@ reloadInternals = ->
         if require.cache[require.resolve("./internal/#{module}")]
             delete Meowbot[moduleName]
             delete require.cache[require.resolve("./internal/#{module}")]
-            Meowbot.Logging.modLog 'Internal', 'Unloaded internal module: ' + moduleName
+            if Meowbot.Logging # the module may not have been loaded at this stage lol
+                Meowbot.Logging.modLog 'Internal', 'Unloaded internal module: ' + moduleName
+            else
+                console.log 'Unloaded internal module: ' + moduleName
         Meowbot[moduleName] = require "./internal/#{module}"
-        Meowbot.Logging.modLog 'Internal', 'Loaded internal module: ' + moduleName
+        if Meowbot.Logging
+            Meowbot.Logging.modLog 'Internal', 'Loaded internal module: ' + moduleName
+        else
+            console.log 'Loaded internal module: ' + moduleName
     Meowbot.Logging.modLog 'Internal', 'Internal modules (re)loaded.'
 reloadInternals()
 
