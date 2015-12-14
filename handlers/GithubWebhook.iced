@@ -36,7 +36,7 @@ init = exports.Init = ->
             return if not Meowbot.HandlerSettings.GithubWebhook.messageCtx # No channel aka message context to send updates to
             branch = Meowbot.Tools.strRightBack ref, '/'
             repo_fullname = data.repository['full_name']
-            output_msg = "**Updates from GitHub (#{repo_fullname}) - #{data.commits.length} commits pushed**"
+            output_msg = "**Updates from GitHub (#{repo_fullname}) - #{data.commits.length} commit(s) pushed**"
             output_msg += "\n**[#{repo}/#{branch} #{commit.id.substring 0, 7}]** #{commit.message.split('\n')[0]} ~ #{commit.author.username} (#{commit.author.name})" for commit in data.commits
             output_msg += "\n***(you can view the full commit history for branch #{branch} here: http://github.com/#{repo_fullname}/commits/#{branch})***"
             Meowbot.Discord.sendMessage Meowbot.HandlerSettings.GithubWebhook.messageCtx, output_msg
