@@ -8,7 +8,7 @@ node_modules
 # Sublime
 *.sublime-workspace
 
-config/config.iced
-config/commands.json
+config/*.json
+config/*.iced
 music/*.mp3
 handlers/Local.iced

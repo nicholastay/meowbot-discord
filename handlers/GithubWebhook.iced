@@ -1,9 +1,16 @@
 localtunnel = require 'localtunnel'
 githubhook = require 'githubhook'
+fs = require 'fs'
+
+saveFile = require('path').join __dirname, '../', '/config', 'GithubWebhook.json'
 
 init = exports.Init = ->
     return if Meowbot.Config.githubwebhook.disabled
     Meowbot.HandlerSettings.GithubWebhook = {} if not Meowbot.HandlerSettings.GithubWebhook
+
+    if not Meowbot.HandlerSettings.GithubWebhook.messageCtx and fs.existsSync saveFile # If file exists and theres no message context
+        Meowbot.HandlerSettings.GithubWebhook.messageCtx = JSON.parse(fs.readFileSync saveFile).messageCtx
+        Meowbot.Logging.modLog 'GitHub Webhook', 'Message context (re)loaded from file.'
 
     # Tunnel client
     if not Meowbot.HandlerSettings.GithubWebhook.tunnel
@@ -47,5 +54,6 @@ handler = exports.Command = (command, tail, message, isPM) ->
     switch command
         when '~gitupdates'
             return Meowbot.Discord.sendMessage message, 'This command can only be used in the context of a server.' if isPM
-            Meowbot.HandlerSettings.GithubWebhook.messageCtx = message
+            Meowbot.HandlerSettings.GithubWebhook.messageCtx = message.channel.id
+            fs.writeFileSync saveFile, JSON.stringify({messageCtx: message.channel.id}), 'utf8'
             Meowbot.Discord.reply message, 'All GitHub commit updates will now be sent to this channel.'

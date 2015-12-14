@@ -5,8 +5,9 @@ commands = {}
 commandsSaveFile = path.join __dirname, '../', '/config', 'Commands.json'
 
 init = exports.Init = ->
-    if fs.statSync commandsSaveFile # If file exists
+    if fs.existsSync commandsSaveFile # If file exists
         commands = JSON.parse fs.readFileSync commandsSaveFile
+        Meowbot.Logging.modLog 'Commands', 'Commands (re)loaded from file.'
 
 handler = exports.Command = (command, tail, message) ->
     if commands[command] and message.author.id isnt Meowbot.Discord.user.id then return Meowbot.Discord.sendMessage message, commands[command].output

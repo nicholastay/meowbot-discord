@@ -113,6 +113,8 @@ replS.context.dc = logOffDiscord
 
 # Global error handler
 process.on 'uncaughtException', (err) ->
-    Meowbot.Logging.error 'GLOBAL:  ' + err
+    Meowbot.Logging.error 'GLOBAL: ' + err
+    Meowbot.Logging.error 'GLOBAL ERROR STACK: ' + err.stack
+    process.exit 1
 
 logInDiscord()
