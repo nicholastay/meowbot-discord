@@ -83,7 +83,7 @@ discord.on 'message', (message) ->
     for handlerName, handler of messageHandlers then handler(message, isPM)
 
     tail = message.content.split ' '
-    command = tail.shift().toLowerCase()
+    command = tail.shift().toLowerCase().trim()
     tail = tail.join ' '
     for handlerName, handler of commandHandlers then handler(command, tail, message, isPM) 
 

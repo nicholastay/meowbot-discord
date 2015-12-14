@@ -3,11 +3,22 @@
   "version": "1.0.0",
   "description": "Some bot for discord",
   "main": "bot.iced",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "engines": {
+    "node": "~0.12.6"
   },
-  "author": "Nicholas Tay <nexerq@gmail.com>",
-  "license": "ISC",
+  "scripts": {
+    "start": "./node_modules/.bin/iced bot.iced"
+  },
+  "author": "Nicholas Tay <nexerq@gmail.com> (http://nicholastay.github.io)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nicholastay/meowbot-discord.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nicholastay/meowbot-discord/issues"
+  },
+  "homepage": "https://github.com/nicholastay/meowbot-discord",
   "dependencies": {
     "chalk": "^1.1.1",
     "discord.js": "^5.1.0",
