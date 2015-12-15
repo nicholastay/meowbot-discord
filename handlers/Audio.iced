@@ -14,7 +14,7 @@ init = exports.Init = ->
     Meowbot.HandlerSettings.Audio.Stopped = true if not Meowbot.HandlerSettings.Audio.Stopped?
     Meowbot.HandlerSettings.Audio.Volume = 25 / 100 if not Meowbot.HandlerSettings.Audio.Volume? # Default volume = 25%
 
-handler = exports.Command = (command, tail, message) ->
+handler = exports.Command = (command, tail, message, isPM) ->
     switch command
         when '~mp3'
             songs = []
@@ -23,6 +23,7 @@ handler = exports.Command = (command, tail, message) ->
 
         when '~playmp3'
             return Meowbot.Discord.reply message, 'you baka baka, I\'m not currently in a voice channel q.q' if not Meowbot.Discord.voiceConnection
+            return Meowbot.Discord.sendMessage message, 'You can\'t privately & silently add songs, you aren\'t one of my masters >.<' if isPM and not Meowbot.Tools.userIsMod message
             songs = fs.readdirSync musicPath
             return Meowbot.Discord.reply message, 'I don\'t currently have that song, but if you... ano... k-kindly a-ask N-N-Nexerq-k-k-k-kun he might just give you a hand.' if tail + '.mp3' not in songs
             addToQueue "#{tail} (MP3)", message, fs.createReadStream("#{musicPath}/#{tail}.mp3")
@@ -30,6 +31,7 @@ handler = exports.Command = (command, tail, message) ->
 
         when '~playyt'
             return Meowbot.Discord.reply message, 'you baka baka, I\'m not currently in a voice channel q.q' if not Meowbot.Discord.voiceConnection
+            return Meowbot.Discord.sendMessage message, 'You can\'t privately & silently add songs, you aren\'t one of my masters >.<' if isPM and not Meowbot.Tools.userIsMod message
             ytVidMatch = ytVidRegex.exec tail
             return Meowbot.Discord.reply message, 'you gave me a link that is not a youtube link...' if not ytVidMatch
             videoId = ytVidMatch[4]
@@ -64,6 +66,7 @@ handler = exports.Command = (command, tail, message) ->
             return Meowbot.Discord.reply message, 'invalid volume input... (volume invalid)' if toVolInt > 100 or toVolInt < 1
             Meowbot.HandlerSettings.Audio.Volume = toVolInt / 100
             Meowbot.Discord.reply message, "I've changed the volume to #{tail}%. Changes should take effect on the next song played."
+            Meowbot.Discord.reply Meowbot.HandlerSettings.Audio.OriginalMessageCtx, "The volume has been changed to #{tail}%. Changes should take effect on the next song played." if isPM
 
         when '~leavevoice'
             return if not Meowbot.Tools.userIsMod message or not Meowbot.Discord.voiceConnection
