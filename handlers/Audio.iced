@@ -43,16 +43,16 @@ handler = exports.Command = (command, tail, message) ->
 
         when '~np'
             return Meowbot.Discord.reply message, 'there is currently nothing playing...' if not Meowbot.HandlerSettings.Audio.NowPlaying
-            Meowbot.Discord.reply message, "**Now Playing**: #{Meowbot.HandlerSettings.Audio.NowPlaying.name} (requested by: #{Meowbot.HandlerSettings.Audio.NowPlaying.requestBy})"
+            Meowbot.Discord.reply message, "**Now Playing**: #{Meowbot.HandlerSettings.Audio.NowPlaying.name} (requested by: #{Meowbot.HandlerSettings.Audio.NowPlaying.requestBy.mention()})"
 
         when '~listenqueue'
             return Meowbot.Discord.reply message, 'there is currently no listen queue...' if not Meowbot.HandlerSettings.Audio.NowPlaying
             listenQueue = 'the current listening queue is as follows: \n'
-            listenQueue += "**NP**: #{Meowbot.HandlerSettings.Audio.NowPlaying.name} (requested by: #{Meowbot.HandlerSettings.Audio.NowPlaying.requestBy})"
+            listenQueue += "**NP**: #{Meowbot.HandlerSettings.Audio.NowPlaying.name} (requested by: #{Meowbot.HandlerSettings.Audio.NowPlaying.requestBy.mention()})"
             listenQueue += '\n*(there is nothing else in the queue...)*' if Meowbot.HandlerSettings.Audio.Queue.length < 1
             counter = 1
             for song in Meowbot.HandlerSettings.Audio.Queue
-                listenQueue += "\n**    #{counter}**: #{song.name} (requested by: #{song.requestBy})"
+                listenQueue += "\n**    #{counter}**: #{song.name} (requested by: #{song.requestBy.mention()})"
                 counter++
             return Meowbot.Discord.reply message, listenQueue
 
@@ -73,6 +73,11 @@ handler = exports.Command = (command, tail, message) ->
         when '~clearqueue'
             return Meowbot.Discord.reply message, 'you\'re not one of my masters, you can\'t tell me what to do! >.<' if not Meowbot.Tools.userIsMod message
             clearQueue message
+
+        when '~queueupdates'
+            return Meowbot.Discord.reply message, 'you\'re not one of my masters, you can\'t tell me what to do! >.<' if not Meowbot.Tools.userIsMod message
+            Meowbot.HandlerSettings.Audio.OriginalMessageCtx = message.channel.id
+            Meowbot.Discord.reply message, 'all future updates for now playing, etc, will be sent to this channel.'
 
 checkIfStoppedPlaying = ->
     return if not Meowbot.Discord.voiceConnection or Meowbot.HandlerSettings.Audio.Stopped is true
@@ -99,7 +104,7 @@ addToQueue = (friendlyName, message, stream) ->
     return Meowbot.Discord.reply message, 'the listening queue is currently full, please try again later.' if Meowbot.HandlerSettings.Audio.Queue.length > requestLimit
     Meowbot.HandlerSettings.Audio.Queue.push
         name: friendlyName
-        requestBy: "<@#{message.author.id}>"
+        requestBy: message.author
         stream: stream
     Meowbot.Discord.reply message, "I have added **#{friendlyName}** to the listening queue."
     Meowbot.Tools.delay 3500, -> skipSong() if Meowbot.HandlerSettings.Audio.Stopped is true # delay for some processing... ffmpeg is slow sometimes
@@ -119,7 +124,7 @@ skipSong = ->
     nowPlaying = Meowbot.HandlerSettings.Audio.Queue.shift()
     Meowbot.HandlerSettings.Audio.NowPlaying = nowPlaying
     return Meowbot.Discord.sendMessage Meowbot.HandlerSettings.Audio.OriginalMessageCtx, 'There are no more items in the queue, playblack has now stopped.' if not nowPlaying
-    Meowbot.Discord.sendMessage Meowbot.HandlerSettings.Audio.OriginalMessageCtx, "**Now Playing**: #{nowPlaying.name} (requested by: #{nowPlaying.requestBy})"
+    Meowbot.Discord.sendMessage Meowbot.HandlerSettings.Audio.OriginalMessageCtx, "**Now Playing**: #{nowPlaying.name} (requested by: #{nowPlaying.requestBy.mention()})"
     startTrackingStopped()
     Meowbot.Discord.voiceConnection.playRawStream nowPlaying.stream,
         volume: Meowbot.HandlerSettings.Audio.Volume
