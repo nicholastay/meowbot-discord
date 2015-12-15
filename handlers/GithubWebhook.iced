@@ -12,20 +12,10 @@ init = exports.Init = ->
         Meowbot.HandlerSettings.GithubWebhook.messageCtx = JSON.parse(fs.readFileSync saveFile).messageCtx
         Meowbot.Logging.modLog 'GitHub Webhook', 'Message context (re)loaded from file.'
 
+    port = Meowbot.Config.localtunnel.port or 27369
+
     # Tunnel client
-    if not Meowbot.HandlerSettings.GithubWebhook.tunnel
-        port = Meowbot.Config.localtunnel.port or 27369
-        localtunnel port,
-            host: 'http://localtunnel.me'
-            port: port
-            subdomain: Meowbot.Config.localtunnel.subdomain
-        , (err, tunnel) ->
-            return Meowbot.Logging.modLog 'GitHub Webhook', 'error opening tunnel to localtunnel.me, error msg: ' + err if err
-            Meowbot.HandlerSettings.GithubWebhook.tunnel = tunnel # store tunnel in case we need it or something, also to detect if already have a client
-            Meowbot.Logging.modLog 'GitHub Webhook', 'localtunnel.me tunnel open, url at: ' + tunnel.url
-            tunnel.on 'error', (err) ->
-                Meowbot.HandlerSettings.GithubWebhook.tunnel = null
-                Meowbot.Logging.modLog 'GitHub Webhook', 'localtunnel.me tunnel error, error: ' + err
+    createTunnel port if not Meowbot.HandlerSettings.GithubWebhook.tunnel
 
     # The actual webhook
     if not Meowbot.HandlerSettings.GithubWebhook.hook
@@ -47,6 +37,27 @@ init = exports.Init = ->
             output_msg += "\n**[#{repo}/#{branch} #{commit.id.substring 0, 7}]** #{commit.message.split('\n')[0]} ~ #{commit.author.username} (#{commit.author.name})" for commit in data.commits
             output_msg += "\n***(you can view the full commit history for branch #{branch} here: http://github.com/#{repo_fullname}/commits/#{branch})***"
             Meowbot.Discord.sendMessage Meowbot.HandlerSettings.GithubWebhook.messageCtx, output_msg
+
+
+createTunnel = (port) ->
+    localtunnel port,
+        host: 'http://localtunnel.me'
+        port: port
+        subdomain: Meowbot.Config.localtunnel.subdomain
+    , (err, tunnel) ->
+        return Meowbot.Logging.modLog 'GitHub Webhook', 'error opening tunnel to localtunnel.me, error msg: ' + err if err
+        Meowbot.HandlerSettings.GithubWebhook.tunnel = tunnel # store tunnel in case we need it or something, also to detect if already have a client
+        Meowbot.Logging.modLog 'GitHub Webhook', 'localtunnel.me tunnel open, url at: ' + tunnel.url
+        tunnel.on 'error', (err) ->
+            try
+                tunnel.close()
+            catch e
+                # whatever
+            Meowbot.HandlerSettings.GithubWebhook.tunnel = null
+            Meowbot.Logging.modLog 'GitHub Webhook', 'localtunnel.me tunnel error, ' + err
+            Meowbot.Logging.modLog 'GitHub Webhook', 'Will try to reconnect in a minute...'
+            Meowbot.Tools.delay 60 * 1000, createTunnel()
+            
 
 handler = exports.Command = (command, tail, message, isPM) ->
     return if Meowbot.Config.githubwebhook.disabled

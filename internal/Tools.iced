@@ -8,3 +8,5 @@ module.exports =
     strRightBack: (str, seperator) -> # http://ozinisle.blogspot.com.au/2010/03/strrightback-in-javascript.html
         pos = str.lastIndexOf seperator
         return str.substring pos+1, str.length
+
+    delay: (ms, cb) -> setTimeout cb, ms # convenience flip func

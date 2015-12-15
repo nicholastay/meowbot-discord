@@ -3,9 +3,8 @@ ytdl = require 'ytdl-core'
 fs = require 'fs'
 path = require 'path'
 
-delay = (ms, cb) -> setTimeout cb, ms # convenience flip func
-
 requestLimit = 10
+musicPath = path.join __dirname, '../', 'music'
 
 init = exports.Init = ->
     Meowbot.HandlerSettings.Audio = {} if not Meowbot.HandlerSettings.Audio
@@ -18,14 +17,14 @@ handler = exports.Command = (command, tail, message) ->
     switch command
         when '~mp3'
             songs = []
-            for file in fs.readdirSync './music' then if path.extname(file) is '.mp3' then songs.push(file.replace('.mp3', ''))
+            for file in fs.readdirSync musicPath then if path.extname(file) is '.mp3' then songs.push(file.replace('.mp3', ''))
             return Meowbot.Discord.reply message, "the available s-songs that N-N-Nexerq-k-k-k-kun put in his f-folder are: #{songs.join ', '}"
 
         when '~playmp3'
             return Meowbot.Discord.reply message, 'you baka baka, I\'m not currently in a voice channel q.q' if not Meowbot.Discord.voiceConnection
-            songs = fs.readdirSync './music'
+            songs = fs.readdirSync musicPath
             return Meowbot.Discord.reply message, 'I don\'t currently have that song, but if you... ano... k-kindly a-ask N-N-Nexerq-k-k-k-kun he might just give you a hand.' if tail + '.mp3' not in songs
-            addToQueue "#{tail} (MP3)", message, fs.createReadStream("./music/#{tail}.mp3")
+            addToQueue "#{tail} (MP3)", message, fs.createReadStream("#{musicPath}/#{tail}.mp3")
             startTrackingStopped(message)
 
         when '~playyt'
@@ -57,7 +56,7 @@ handler = exports.Command = (command, tail, message) ->
             return Meowbot.Discord.reply message, listenQueue
 
         when '~leavevoice'
-            return if not Meowbot.Tools.userIsMod message or not Meowbot.Tools.userIsMod message
+            return if not Meowbot.Tools.userIsMod message or not Meowbot.Discord.voiceConnection
             Meowbot.HandlerSettings.Audio.OriginalMessageCtx = null
             clearQueue message
 
@@ -75,7 +74,7 @@ checkIfStoppedPlaying = ->
     Meowbot.HandlerSettings.Audio.LastMS = Meowbot.Discord.voiceConnection.streamTime # if the streamTime is equal to LastMS then it stopped playing, so we have to store it and check
 
 startTrackingStopped = ->
-    delay 3500, ->
+    Meowbot.Tools.delay 3500, ->
         Meowbot.HandlerSettings.Audio.Stopped = false
 
 getYtStream = (videoId) ->
@@ -93,20 +92,20 @@ addToQueue = (friendlyName, message, stream) ->
         requestBy: "<@#{message.author.id}>"
         stream: stream
     Meowbot.Discord.reply message, "I have added **#{friendlyName}** to the listening queue."
-    delay 3500, -> skipSong() if Meowbot.HandlerSettings.Audio.Stopped is true # delay for some processing... ffmpeg is slow sometimes
+    Meowbot.Tools.delay 3500, -> skipSong() if Meowbot.HandlerSettings.Audio.Stopped is true # delay for some processing... ffmpeg is slow sometimes
 
 onStoppedPlaying = ->
-    skipSong()
+    skipSong() if Meowbot.Discord.voiceConnection
 
 clearQueue = (message) ->
+    Meowbot.Discord.voiceConnection.stopPlaying() if Meowbot.Discord.voiceConnection and Meowbot.HandlerSettings.Audio.NowPlaying
     Meowbot.HandlerSettings.Audio.NowPlaying = null if Meowbot.HandlerSettings.Audio.NowPlaying
     if Meowbot.HandlerSettings.Audio.Queue.length > 0
         Meowbot.HandlerSettings.Audio.Queue = []
-        Meowbot.Discord.voiceConnection.stopPlaying()
         Meowbot.Discord.sendMessage message, '*(the listening queue has been cleared)*'
 
 skipSong = ->
-    Meowbot.Discord.voiceConnection.stopPlaying()
+    Meowbot.Discord.voiceConnection.stopPlaying() if Meowbot.Discord.voiceConnection
     nowPlaying = Meowbot.HandlerSettings.Audio.Queue.shift()
     Meowbot.HandlerSettings.Audio.NowPlaying = nowPlaying
     return Meowbot.Discord.sendMessage Meowbot.HandlerSettings.Audio.OriginalMessageCtx, 'There are no more items in the queue, playblack has now stopped.' if not nowPlaying
