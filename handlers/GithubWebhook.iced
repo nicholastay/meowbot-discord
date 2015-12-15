@@ -56,7 +56,7 @@ createTunnel = (port) ->
             Meowbot.HandlerSettings.GithubWebhook.tunnel = null
             Meowbot.Logging.modLog 'GitHub Webhook', 'localtunnel.me tunnel error, ' + err
             Meowbot.Logging.modLog 'GitHub Webhook', 'Will try to reconnect in a minute...'
-            Meowbot.Tools.delay 60 * 1000, createTunnel()
+            Meowbot.Tools.delay 60 * 1000, -> createTunnel()
             
 
 handler = exports.Command = (command, tail, message, isPM) ->
