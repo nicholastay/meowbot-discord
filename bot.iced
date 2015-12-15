@@ -41,6 +41,7 @@ Meowbot.DiscordLoader.login(true)
 replS.context.ch = Meowbot.CommandHandlers
 replS.context.mh = Meowbot.MessageHandlers
 replS.context.ri = reloadInternals
+replS.context.rc = Meowbot.ConfigLoader.reloadConfig
 
 # Global error handler
 process.on 'uncaughtException', (err) ->

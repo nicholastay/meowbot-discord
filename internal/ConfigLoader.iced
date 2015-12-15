@@ -1,8 +1,7 @@
-configPath = require('path').join __dirname, '../', 'config'
+configFile = require('path').join __dirname, '../', 'config', 'Config.iced'
 
 exports.reloadConfig = reloadConfig = ->
-    Meowbot.Repl.context.rc = reloadConfig if not Meowbot.Config # Nothing in the config must be first time
     config = Meowbot.Config = {}
-    delete require.cache[require.resolve("#{configPath}/Config")] if require.cache[require.resolve("#{configPath}/Config")]
-    config = Meowbot.Config = require "#{configPath}/Config"
+    delete require.cache[require.resolve(configFile)] if require.cache[require.resolve(configFile)]
+    config = Meowbot.Config = require configFile
     Meowbot.Logging.modLog 'Config', 'Config (re)loaded.'
