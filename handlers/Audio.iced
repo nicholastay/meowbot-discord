@@ -12,6 +12,7 @@ init = exports.Init = ->
     Meowbot.HandlerSettings.Audio.NowPlaying = null if not Meowbot.HandlerSettings.Audio.NowPlaying?
     Meowbot.HandlerSettings.Audio.LastMS = -1 if not Meowbot.HandlerSettings.Audio.LastMS?
     Meowbot.HandlerSettings.Audio.Stopped = true if not Meowbot.HandlerSettings.Audio.Stopped?
+    Meowbot.HandlerSettings.Audio.Volume = 25 / 100 if not Meowbot.HandlerSettings.Audio.Volume? # Default volume = 25%
 
 handler = exports.Command = (command, tail, message) ->
     switch command
@@ -54,6 +55,15 @@ handler = exports.Command = (command, tail, message) ->
                 listenQueue += "\n**    #{counter}**: #{song.name} (requested by: #{song.requestBy})"
                 counter++
             return Meowbot.Discord.reply message, listenQueue
+
+        when '~volume'
+            return Meowbot.Discord.reply message, 'you\'re not one of my masters, you can\'t tell me what to do! >.<' if not Meowbot.Tools.userIsMod message
+            tail = tail.replace '%', ''
+            return Meowbot.Discord.reply message, 'invalid volume input... (numbers only pls b0ss)' if not  /^\d+$/.test tail # numbers test
+            toVolInt = parseInt tail
+            return Meowbot.Discord.reply message, 'invalid volume input... (volume invalid)' if toVolInt > 100 or toVolInt < 1
+            Meowbot.HandlerSettings.Audio.Volume = toVolInt / 100
+            Meowbot.Discord.reply message, "I've changed the volume to #{tail}%. Changes should take effect on the next song played."
 
         when '~leavevoice'
             return if not Meowbot.Tools.userIsMod message or not Meowbot.Discord.voiceConnection
@@ -111,7 +121,6 @@ skipSong = ->
     return Meowbot.Discord.sendMessage Meowbot.HandlerSettings.Audio.OriginalMessageCtx, 'There are no more items in the queue, playblack has now stopped.' if not nowPlaying
     await Meowbot.Discord.sendMessage Meowbot.HandlerSettings.Audio.OriginalMessageCtx, "**Now Playing**: #{nowPlaying.name} (requested by: #{nowPlaying.requestBy})", defer whatever # delay for encoding as well
     startTrackingStopped()
-    try
-        Meowbot.Discord.voiceConnection.playRawStream nowPlaying.stream
-    catch e
-        Meowbot.Discord.sendMessage Meowbot.HandlerSettings.Audio.OriginalMessageCtx, "There was an **error** with playing the song, I don\'t know exactly why, but the show must go on!... (please forward this error message to Nexerq: #{e})"
+    Meowbot.Discord.voiceConnection.playRawStream nowPlaying.stream,
+        volume: Meowbot.HandlerSettings.Audio.Volume
+    , (err) -> Meowbot.Discord.sendMessage Meowbot.HandlerSettings.Audio.OriginalMessageCtx, "There was an **error** with playing the song, I don\'t know exactly why, but the show must go on!... (please forward this error message to Nexerq: #{err})" if err
