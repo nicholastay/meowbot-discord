@@ -4,13 +4,12 @@ handler = exports.Command = (command, tail, message, isPM) ->
             return if not tail
             return Meowbot.Discord.sendMessage message, 'This command can only be used in the context of a server.' if isPM
             return Meowbot.Discord.reply message, 'you\'re not one of my masters, please don\'t force me to join a voice channel...' if not Meowbot.Tools.userIsMod message
-            voiceChannels = message.channel.server.channels.filter (channel) -> return channel.name is tail
-            return Meowbot.Discord.reply message, 'that is an invalid channel, don\'t force me into dark alleyways please.' if not voiceChannels.length > 0
-            channel = voiceChannels[0]
-            return Meowbot.Discord.reply message, "#{tail} is not a voice channel. I can't scream in a text channel now, can I? :P" if channel.type isnt 'voice'
+            voiceChannel = message.channel.server.channels.get 'name', tail
+            return Meowbot.Discord.reply message, 'that is an invalid channel, don\'t force me into dark alleyways please.' if not voiceChannel
+            return Meowbot.Discord.reply message, "#{tail} is not a voice channel. I can't scream in a text channel now, can I? :P" if voiceChannel.type isnt 'voice'
             Meowbot.HandlerSettings.Audio.OriginalMessageCtx = message.channel.id
             Meowbot.Discord.reply message, "joining voice channel #{tail}, and also all updates like now playing will be sent to this channel."
-            Meowbot.Discord.joinVoiceChannel channel, (err) ->
+            Meowbot.Discord.joinVoiceChannel voiceChannel, (err) ->
                 Meowbot.Discord.sendMessage message, "There was an **error** with the Discord voice server, I don\'t know exactly why though... (please forward this error message to Nexerq: #{err})" if err
             Meowbot.HandlerSettings.Audio.NowPlaying = null if Meowbot.HandlerSettings.Audio.NowPlaying
             Meowbot.HandlerSettings.Audio.Queue = [] if Meowbot.HandlerSettings.Audio.Queue.length > 0
