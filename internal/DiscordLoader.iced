@@ -1,6 +1,7 @@
 DiscordJS = require 'discord.js'
 
-discord = new DiscordJS.Client()
+discord = new DiscordJS.Client
+    revive: true
 
 exports.login = login = (firstLogin) ->
     if firstLogin # Create event handlers and assign stuff
@@ -18,8 +19,10 @@ exports.login = login = (firstLogin) ->
             for handlerName, handler of Meowbot.CommandHandlers then handler(command, tail, message, isPM) 
 
         discord.on 'disconnected', ->
-            Meowbot.Logging.modLog 'Discord', 'Client was disconnected from Discord. Will try to login again in a minute...'
-            Meowbot.Tools.delay 60 * 1000, -> logInDiscord()
+            Meowbot.Logging.modLog 'Discord', 'Client was disconnected from Discord. Will try to relogin...'
+
+        discord.on 'autoRevive', ->
+            Meowbot.Logging.modLog 'Discord', 'Client reconnected to Discord.'
 
         Meowbot.Discord = discord
         Meowbot.Repl.context.discord = discord
