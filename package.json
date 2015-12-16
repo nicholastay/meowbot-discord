@@ -33,6 +33,7 @@
     "node-opus": "^0.1.11",
     "request": "^2.67.0",
     "seedrandom": "^2.4.2",
+    "text-table": "^0.2.0",
     "ytdl-core": "^0.7.8"
   }
 }
