@@ -21,7 +21,7 @@
   "homepage": "https://github.com/nicholastay/meowbot-discord",
   "dependencies": {
     "chalk": "^1.1.1",
-    "discord.js": "github:hydrabolt/discord.js#3614b78",
+    "discord.js": "^5.3.1",
     "fast-strftime": "^1.1.1",
     "githubhook": "^1.3.0",
     "google": "^1.3.0",
