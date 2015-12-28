@@ -1,6 +1,7 @@
 fs = require 'fs'
+path = require 'path'
 
-handlersPath = require('path').join __dirname, '../', 'handlers'
+handlersPath = path.join __dirname, '../', 'handlers'
 
 
 exports.unloadHandler = unloadHandler = (handlerName) ->
@@ -49,6 +50,8 @@ exports.reloadHandlers = reloadHandlers = (firstRun) ->
             help: 'Unload a message handler'
             action: unloadHandler
             
-    for handler in fs.readdirSync handlersPath then reloadHandler handler.replace('.iced', ''), firstRun
+    for handler in fs.readdirSync handlersPath
+        continue if path.extname(handler) isnt '.iced'
+        reloadHandler handler.replace('.iced', ''), firstRun
     return Meowbot.Logging.modLog 'MsgHandlers', 'Handlers successfully reloaded.' if not firstRun
     Meowbot.Logging.modLog 'MsgHandlers', 'Handlers successfully loaded.'

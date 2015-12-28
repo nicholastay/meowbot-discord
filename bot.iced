@@ -18,6 +18,7 @@ console.log '\n'
 # Core file loader
 reloadInternals = ->
     for module in fs.readdirSync './internal'
+        continue if require('path').extname(module) isnt '.iced'
         moduleName = module.replace '.iced', ''
         if require.cache[require.resolve("./internal/#{module}")]
             delete Meowbot[moduleName]
