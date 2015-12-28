@@ -7,7 +7,7 @@ exports.login = login = (firstLogin) ->
     if firstLogin # Create event handlers and assign stuff
         discord.on 'ready', ->
             Meowbot.Logging.modLog 'Discord', 'Logged in to Discord.'
-            discord.setStatus 'online', 452
+            discord.setStatus 'online', 'with Nexerq :3'
 
         discord.on 'message', (message) ->
             isPM = message.channel instanceof DiscordJS.PMChannel
