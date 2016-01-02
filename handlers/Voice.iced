@@ -7,12 +7,9 @@ handler = exports.Command = (command, tail, message, isPM) ->
             voiceChannel = message.channel.server.channels.get 'name', tail
             return Meowbot.Discord.reply message, 'that is an invalid channel, don\'t force me into dark alleyways please.' if not voiceChannel
             return Meowbot.Discord.reply message, "#{tail} is not a voice channel. I can't scream in a text channel now, can I? :P" if voiceChannel.type isnt 'voice'
-            Meowbot.HandlerSettings.Audio.OriginalMessageCtx = message.channel.id
             Meowbot.Discord.reply message, "joining voice channel #{tail}, and also all updates like now playing will be sent to this channel."
             Meowbot.Discord.joinVoiceChannel voiceChannel, (err) ->
                 Meowbot.Discord.sendMessage message, "There was an **error** with the Discord voice server, I don\'t know exactly why though... (please forward this error message to Nexerq: #{err})" if err
-            Meowbot.HandlerSettings.Audio.NowPlaying = null if Meowbot.HandlerSettings.Audio.NowPlaying
-            Meowbot.HandlerSettings.Audio.Queue = [] if Meowbot.HandlerSettings.Audio.Queue.length > 0
 
         when '~leavevoice'
             return Meowbot.Discord.reply message, 'you baka baka, I\'m not currently in a voice channel q.q' if not Meowbot.Discord.voiceConnection
