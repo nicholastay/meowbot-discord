@@ -33,17 +33,17 @@ handler = exports.Command = (command, tail, message) ->
 
         when '~np'
             return Meowbot.Discord.reply message, 'you baka, I\'m not currently in a voice channel :3' if not Meowbot.Discord.voiceConnection
-            return Meowbot.Discord.reply message, "the song that is currently playing is: #{Meowbot.HandlerSettings.Audio.NP.name} *(requested by: #{Meowbot.HandlerSettings.Audio.NP.requester.username})*" if Meowbot.HandlerSettings.Audio.NP
+            return Meowbot.Discord.reply message, "the song that is currently playing is: **#{Meowbot.HandlerSettings.Audio.NP.name}** *(requested by: #{Meowbot.HandlerSettings.Audio.NP.requester.username})*" if Meowbot.HandlerSettings.Audio.NP
             Meowbot.Discord.reply message, 'there is no music currently playing, baka!'
 
         when '~queue'
             return Meowbot.Discord.reply message, 'you baka, I\'m not currently in a voice channel :3' if not Meowbot.Discord.voiceConnection
             return Meowbot.Discord.reply message, 'there is no music or queue currently playing, baka!' if not Meowbot.HandlerSettings.Audio.NP
-            formattedStr = "**NP**: #{Meowbot.HandlerSettings.Audio.NP.name} *(requested by: #{Meowbot.HandlerSettings.Audio.NP.requester.username})*"
+            formattedStr = "***NP***: **#{Meowbot.HandlerSettings.Audio.NP.name}** *(requested by: #{Meowbot.HandlerSettings.Audio.NP.requester.username})*"
             if Meowbot.HandlerSettings.Audio.Queue.length < 1
                 formattedStr += '\n*(there is no queue afterwards, feel free to request more!)*'
             else
-                formattedStr += "\n**#{i+1}**: #{track.name} *(requested by: #{track.requester.username})*" for track, i in Meowbot.HandlerSettings.Audio.Queue
+                formattedStr += "\n***#{i+1}***: **#{track.name}** *(requested by: #{track.requester.username})*" for track, i in Meowbot.HandlerSettings.Audio.Queue
             return Meowbot.Discord.reply message, "the queue is as follows:\n#{formattedStr}"
 
         when '~playyt'
@@ -85,10 +85,10 @@ onStoppedPlaying = ->
 addToQueue = (message, trackdata) ->
     return Meowbot.Discord.reply message, 'There\'s already 10 tracks or more in the queue, please wait and try again later.' if Meowbot.HandlerSettings.Audio.Queue.length >= 10
     Meowbot.HandlerSettings.Audio.Queue.push trackdata
-    Meowbot.Discord.reply message, "I have added the song #{trackdata.name} to the queue. ^-^"
+    await Meowbot.Discord.reply message, "I have added the track **#{trackdata.name}** to the queue. ^-^", defer() # This msg should show up first?
     playNextTrack() if Meowbot.HandlerSettings.Audio.Queue.length is 1 and not Meowbot.HandlerSettings.Audio.NP # Only song in the queue, nothing playing, play it right away
 
 playNextTrack = -> # This assumes there are songs in the queue!
     toPlay = Meowbot.HandlerSettings.Audio.NP = Meowbot.HandlerSettings.Audio.Queue.shift()
     Meowbot.Discord.voiceConnection.playRawStream toPlay.stream
-    Meowbot.Discord.sendMessage Meowbot.HandlerSettings.Voice.UpdatesContext, "**Now Playing**: #{toPlay.name} *(requested by: #{toPlay.requester.username})*" if Meowbot.HandlerSettings.Voice.UpdatesContext
+    Meowbot.Discord.sendMessage Meowbot.HandlerSettings.Voice.UpdatesContext, "***Now Playing***: **#{toPlay.name}** *(requested by: #{toPlay.requester.username})*" if Meowbot.HandlerSettings.Voice.UpdatesContext
