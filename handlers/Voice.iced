@@ -17,6 +17,7 @@ handler = exports.Command = (command, tail, message, isPM) ->
             return Meowbot.Discord.reply message, 'you\'re not one of my masters, please don\'t force me into the open where people can do all kinds of things to me... >.<' if not Meowbot.Tools.userIsMod message
             Meowbot.Discord.voiceConnection.stopPlaying()
             Meowbot.Discord.leaveVoiceChannel()
+            Meowbot.HandlerSettings.Voice.UpdatesContext = null
             return Meowbot.Discord.reply message, 'I left voice on your request.'
 
         # when '~stopplaying'
