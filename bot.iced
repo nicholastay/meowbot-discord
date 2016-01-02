@@ -52,4 +52,9 @@ Meowbot.Repl.defineCommand 'rc',
 # Global error handler
 process.on 'uncaughtException', (err) ->
     Meowbot.Logging.error 'GLOBAL ERROR STACK: \n' + err.stack
+    if err.code is 'ECONNRESET'
+        return console.log 'Detected ECONNRESET: just like some youtube mishap or something, ignoring and continuing...'
+    if err.code is 'EPIPE'
+        return console.log 'Detected EPIPE: well whatever by now I\'m just annoyed, I\'ll just let it slip...'
+
     process.exit 1

@@ -1,7 +1,9 @@
 fs = require 'fs'
 path = require 'path'
+ytdl = require 'ytdl-core'
 
 musicPath = path.join __dirname, '../', 'music'
+ytVidRegex = /((youtube\.com\/watch\?v=)|(youtu\.be\/))([A-Za-z0-9-_]+)/i
 
 handler = exports.Command = (command, tail, message) ->
     switch command
@@ -43,6 +45,19 @@ handler = exports.Command = (command, tail, message) ->
             else
                 formattedStr += "\n**#{i+1}**: #{track.name} *(requested by: #{track.requester.username})*" for track, i in Meowbot.HandlerSettings.Audio.Queue
             return Meowbot.Discord.reply message, "the queue is as follows:\n#{formattedStr}"
+
+        when '~playyt'
+            return Meowbot.Discord.reply message, 'you baka, I\'m not currently in a voice channel :3' if not Meowbot.Discord.voiceConnection
+            ytVidReg = ytVidRegex.exec tail
+            return Meowbot.Discord.reply message, 'that is not a valid YouTube link, what are you trying to do to me...' if not ytVidReg
+            ytVidID = ytVidReg[4]
+            await ytdl.getInfo "http://www.youtube.com/watch?v=#{ytVidID}", defer err, info
+            return Meowbot.Discord.reply message, 'invalid YouTube video link (in which case, why -_-), or I am having trouble connecting to YouTube.' if err
+            friendlyName = if info.title and info.author then "#{info.title} (uploaded by #{info.author})" else "YouTube video ID #{ytVidID} [Was unable to retrieve metadata]"
+            addToQueue message,
+                name: friendlyName
+                stream: ytdl.downloadFromInfo info, {quality: 140} # quality 140, code for audio
+                requester: message.author
 
 init = exports.Init = ->
     Meowbot.HandlerSettings.Audio = {} if not Meowbot.HandlerSettings.Audio
