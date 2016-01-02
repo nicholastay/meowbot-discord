@@ -17,3 +17,4 @@ exports.moduleDefinitions = moduleDefinitions =
     'Config': 'yellow'
     'Discord': 'green'
     'Discord Chat': 'cyan'
+    'Audio': 'yellow'
