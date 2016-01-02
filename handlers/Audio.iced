@@ -5,7 +5,7 @@ ytdl = require 'ytdl-core'
 musicPath = path.join __dirname, '../', 'music'
 ytVidRegex = /((youtube\.com\/watch\?v=)|(youtu\.be\/))([A-Za-z0-9-_]+)/i
 
-handler = exports.Command = (command, tail, message) ->
+handler = exports.Command = (command, tail, message, isPM) ->
     switch command
         when '~mp3'
             songs = []
@@ -15,6 +15,7 @@ handler = exports.Command = (command, tail, message) ->
             Meowbot.Discord.reply message, 'the available songs that Nexerq has put in his music library for me are: ' + songs.join ', '
 
         when '~playmp3'
+            if isPM then if not Meowbot.Tools.userIsMod message then return # Do not allow other users to add songs privately via PM, just silently return. Check for PM first then check for Mod so dont have to check user as mod every msg
             return Meowbot.Discord.reply message, 'you baka, I\'m not currently in a voice channel :3' if not Meowbot.Discord.voiceConnection
             toPlaySong = tail + '.mp3'
             songs = fs.readdirSync musicPath
@@ -26,6 +27,7 @@ handler = exports.Command = (command, tail, message) ->
             # Meowbot.Discord.voiceConnection.playFile path.join musicPath, toPlaySong
 
         when '~fskip'
+            if isPM then if not Meowbot.Tools.userIsMod message then return
             return Meowbot.Discord.reply message, 'you baka, I\'m not currently in a voice channel :3' if not Meowbot.Discord.voiceConnection
             return Meowbot.Discord.reply message, 'you are not one of my masters, you can\'t tell me what to do!' if not Meowbot.Tools.userIsMod message
             Meowbot.Discord.voiceConnection.stopPlaying() # this will trigger the onStoppedPlaying() handler by default
@@ -47,6 +49,7 @@ handler = exports.Command = (command, tail, message) ->
             return Meowbot.Discord.reply message, "the queue is as follows:\n#{formattedStr}"
 
         when '~playyt'
+            if isPM then if not Meowbot.Tools.userIsMod message then return
             return Meowbot.Discord.reply message, 'you baka, I\'m not currently in a voice channel :3' if not Meowbot.Discord.voiceConnection
             ytVidReg = ytVidRegex.exec tail
             return Meowbot.Discord.reply message, 'that is not a valid YouTube link, what are you trying to do to me...' if not ytVidReg
