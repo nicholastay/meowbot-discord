@@ -15,7 +15,7 @@ exports.login = login = (firstLogin) ->
 
             if message.content[0] is (Meowbot.Config.commandPrefix or '!')
                 spaceIndex = message.content.indexOf(' ')
-                command = message.content.toLowerCase().substr 1, spaceIndex-1 # substr from without prefix to first space
+                command = message.content.toLowerCase().substr 1, (if spaceIndex is -1 then message.content.length else spaceIndex-1) # substr from without prefix to first space
                 tail = if spaceIndex is -1 then '' else message.content.substr spaceIndex+1, message.content.length # substr after space to end, also check if index is -1, -1 means couldnt find, so the person just did the command with no args
                 for handlerName, handler of Meowbot.CommandHandlers then handler(command, tail, message, isPM)
 
