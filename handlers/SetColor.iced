@@ -3,7 +3,7 @@ userTagRegex = /<@([0-9]+)>/
 
 handler = exports.Command = (command, tail, message, isPM) ->
     switch command
-        when '~setcolor'
+        when 'setcolor'
             return Meowbot.Discord.sendMessage message, 'This command can only be used in the context of a server.' if isPM
             return Meowbot.Discord.reply message, 'you\'re not one of my masters, you\'re not special enough (^:' if not Meowbot.Tools.userIsMod message
 
@@ -48,7 +48,7 @@ handler = exports.Command = (command, tail, message, isPM) ->
 
 
 
-        when '~setrolecolor'
+        when 'setrolecolor'
             return Meowbot.Discord.sendMessage message, 'This command can only be used in the context of a server.' if isPM
             return Meowbot.Discord.reply message, 'you\'re not one of my masters, you\'re not special enough (^:' if not Meowbot.Tools.userIsMod message
 

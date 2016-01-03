@@ -63,7 +63,7 @@ handler = exports.Command = (command, tail, message, isPM) ->
     return if Meowbot.Config.githubwebhook.disabled
 
     switch command
-        when '~gitupdates'
+        when 'gitupdates'
             return Meowbot.Discord.sendMessage message, 'This command can only be used in the context of a server.' if isPM
             Meowbot.HandlerSettings.GithubWebhook.messageCtx = message.channel.id
             fs.writeFileSync saveFile, JSON.stringify({messageCtx: message.channel.id}), 'utf8'

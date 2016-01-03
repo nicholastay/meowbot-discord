@@ -7,14 +7,14 @@ ytVidRegex = /((youtube\.com\/watch\?v=)|(youtu\.be\/))([A-Za-z0-9-_]+)/i
 
 handler = exports.Command = (command, tail, message, isPM) ->
     switch command
-        when '~mp3'
+        when 'mp3'
             songs = []
             for song in fs.readdirSync musicPath
                 continue if path.extname(song) isnt '.mp3'
                 songs.push song.replace '.mp3', ''
             Meowbot.Discord.reply message, 'the available songs that Nexerq has put in his music library for me are: ' + songs.join ', '
 
-        when '~playmp3'
+        when 'playmp3'
             if isPM then if not Meowbot.Tools.userIsMod message then return # Do not allow other users to add songs privately via PM, just silently return. Check for PM first then check for Mod so dont have to check user as mod every msg
             return Meowbot.Discord.reply message, 'you baka, I\'m not currently in a voice channel :3' if not Meowbot.Discord.voiceConnection
             toPlaySong = tail + '.mp3'
@@ -26,14 +26,14 @@ handler = exports.Command = (command, tail, message, isPM) ->
                 requester: message.author
             # Meowbot.Discord.voiceConnection.playFile path.join musicPath, toPlaySong
 
-        when '~fskip'
+        when 'fskip'
             if isPM then if not Meowbot.Tools.userIsMod message then return
             return Meowbot.Discord.reply message, 'you baka, I\'m not currently in a voice channel :3' if not Meowbot.Discord.voiceConnection
             return Meowbot.Discord.reply message, 'you are not one of my masters, you can\'t tell me what to do!' if not Meowbot.Tools.userIsMod message
             Meowbot.Discord.voiceConnection.stopPlaying() # this will trigger the onStoppedPlaying() handler by default
             Meowbot.Discord.reply message, 'forcefully skipped the current playing track.'
 
-        when '~volume'
+        when 'volume'
             if isPM then if not Meowbot.Tools.userIsMod message then return
             return Meowbot.Discord.reply message, 'you are not one of my masters, you can\'t tell me what to do!' if not Meowbot.Tools.userIsMod message
             return Meowbot.Discord.reply message, 'you have specified an invalid volume (percentage).' if not /^(\d{1,2}|100)%?$/.test tail # Testing for two digit numbers/100 and optional %
@@ -42,12 +42,12 @@ handler = exports.Command = (command, tail, message, isPM) ->
             Meowbot.Logging.modLog 'Audio', "Audio encoder volume set to #{toVolume}%"
             Meowbot.Discord.reply message, "the volume has been set to #{toVolume}%. *(Changes will be applied on the next track's playback.)*"
 
-        when '~np'
+        when 'np'
             return Meowbot.Discord.reply message, 'you baka, I\'m not currently in a voice channel :3' if not Meowbot.Discord.voiceConnection
             return Meowbot.Discord.reply message, "the song that is currently playing is: **#{Meowbot.HandlerSettings.Audio.NP.name}** *(requested by: #{Meowbot.HandlerSettings.Audio.NP.requester.username})*" if Meowbot.HandlerSettings.Audio.NP
             Meowbot.Discord.reply message, 'there is no music currently playing, baka!'
 
-        when '~queue'
+        when 'queue'
             return Meowbot.Discord.reply message, 'you baka, I\'m not currently in a voice channel :3' if not Meowbot.Discord.voiceConnection
             return Meowbot.Discord.reply message, 'there is no music or queue currently playing, baka!' if not Meowbot.HandlerSettings.Audio.NP
             formattedStr = "***NP***: **#{Meowbot.HandlerSettings.Audio.NP.name}** *(requested by: #{Meowbot.HandlerSettings.Audio.NP.requester.username})*"
@@ -57,7 +57,7 @@ handler = exports.Command = (command, tail, message, isPM) ->
                 formattedStr += "\n***#{i+1}***: **#{track.name}** *(requested by: #{track.requester.username})*" for track, i in Meowbot.HandlerSettings.Audio.Queue
             return Meowbot.Discord.reply message, "the queue is as follows:\n#{formattedStr}"
 
-        when '~playyt'
+        when 'playyt'
             if isPM then if not Meowbot.Tools.userIsMod message then return
             return Meowbot.Discord.reply message, 'you baka, I\'m not currently in a voice channel :3' if not Meowbot.Discord.voiceConnection
             ytVidReg = ytVidRegex.exec tail

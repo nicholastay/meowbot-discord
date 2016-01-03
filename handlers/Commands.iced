@@ -9,11 +9,13 @@ init = exports.Init = ->
         commands = JSON.parse fs.readFileSync commandsSaveFile
         Meowbot.Logging.modLog 'Commands', 'Commands (re)loaded from file.'
 
-handler = exports.Command = (command, tail, message) ->
-    if commands[command] and message.author.id isnt Meowbot.Discord.user.id then return Meowbot.Discord.sendMessage message, commands[command].output
+mHandler = exports.Message = (message) ->
+    command = message.content.toLowerCase().substr 0, message.content.indexOf(' ')
+    if commands[command] and message.author.id isnt Meowbot.Discord.user.id then Meowbot.Discord.sendMessage message, commands[command].output
 
+cHandler = exports.Command = (command, tail, message) ->
     switch command
-        when '~addcom'
+        when 'addcom'
             return Meowbot.Discord.reply message, 'you\'re not one of my masters, you can\'t tell me what to do! >.<' if not Meowbot.Tools.userIsMod message
             return if not tail
             output = tail.split ' '
@@ -28,7 +30,7 @@ handler = exports.Command = (command, tail, message) ->
             saveCommands()
             Meowbot.Discord.reply message, 'command most likely has been added...'
 
-        when '~delcom'
+        when 'delcom'
             return Meowbot.Discord.reply message, 'you\'re not one of my masters, you can\'t tell me what to do! >.<' if not Meowbot.Tools.userIsMod message
             return if not tail
             output = tail.split ' '

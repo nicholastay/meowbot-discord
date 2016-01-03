@@ -1,4 +1,5 @@
 module.exports =
+    commandPrefix: '~' # Prefix for commands
     admins: ['userid'] # The admins as user IDs
     mods: ['userid2', 'userid3'] # Mods as user IDs
     discord:

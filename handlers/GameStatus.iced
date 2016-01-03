@@ -7,7 +7,7 @@ changePlayingGameRand = -> changePlayingGame gameIds[Meowbot.Tools.getRandomInt(
 
 handler = exports.Command = (command, tail, message) ->
     switch command
-        when '~changegame'
+        when 'changegame'
             return Meowbot.Discord.reply message, 'you\'re not one of my masters, you can\'t tell me what to do! >.<' if not Meowbot.Tools.userIsMod message
             return if not tail
             switch tail

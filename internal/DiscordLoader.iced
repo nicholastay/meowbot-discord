@@ -13,10 +13,11 @@ exports.login = login = (firstLogin) ->
             isPM = message.channel instanceof DiscordJS.PMChannel
             for handlerName, handler of Meowbot.MessageHandlers then handler(message, isPM)
 
-            tail = message.content.split ' '
-            command = tail.shift().toLowerCase().trim()
-            tail = tail.join ' '
-            for handlerName, handler of Meowbot.CommandHandlers then handler(command, tail, message, isPM) 
+            if message.content[0] is (Meowbot.Config.commandPrefix or '!')
+                spaceIndex = message.content.indexOf(' ')
+                command = message.content.toLowerCase().substr 1, spaceIndex-1 # substr from without prefix to first space
+                tail = if spaceIndex is -1 then '' else message.content.substr spaceIndex+1, message.content.length # substr after space to end, also check if index is -1, -1 means couldnt find, so the person just did the command with no args
+                for handlerName, handler of Meowbot.CommandHandlers then handler(command, tail, message, isPM)
 
         discord.on 'disconnected', ->
             Meowbot.Logging.modLog 'Discord', 'Client was disconnected from Discord. Will try to relogin...'

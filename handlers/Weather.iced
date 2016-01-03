@@ -10,7 +10,7 @@ init = exports.Init = ->
 
 handler = exports.Command = (command, tail, message) ->
     switch command
-        when '~weather'
+        when 'weather'
             place = if tail then tail else 'Melbourne, Australia'
             await request apiUrl + makeSqlQuery(place), defer err, resp, body
             return Meowbot.Discord.reply message, 'there was a problem with contacting Yahoo Weather right now, please try again later.' if err or resp.statusCode isnt 200
@@ -26,11 +26,11 @@ handler = exports.Command = (command, tail, message) ->
             Meowbot.HandlerSettings.Weather.UserForecasts[message.author.id] = {} if not Meowbot.HandlerSettings.Weather.UserForecasts[message.author.id]
             Meowbot.HandlerSettings.Weather.UserForecasts[message.author.id] = placeData.item.forecast
 
-            Meowbot.Discord.reply message, "the current weather #{friendlyTitle} is that it's #{friendlyText} with a temperature of #{temperature}°C.\n*(If you would like the forecast for the next five days, use ~forecast.)*"
+            Meowbot.Discord.reply message, "the current weather #{friendlyTitle} is that it's #{friendlyText} with a temperature of #{temperature}°C.\n*(If you would like the forecast for the next five days, use #{(Meowbot.Config.commandPrefix or '!')}forecast.)*"
 
 
-        when '~forecast'
-            return Meowbot.Discord.reply message, 'there is no forecast data for you. Please request the weather (with ~weather [location]) first.' if not Meowbot.HandlerSettings.Weather.UserForecasts[message.author.id]?
+        when 'forecast'
+            return Meowbot.Discord.reply message, "there is no forecast data for you. Please request the weather (with #{(Meowbot.Config.commandPrefix or '!')}weather [location]) first." if not Meowbot.HandlerSettings.Weather.UserForecasts[message.author.id]?
             generateTable = [['Day', 'Description', 'Low', 'Top']]
             generateTable.push [day.day, day.text, day.low, day.high] for day in Meowbot.HandlerSettings.Weather.UserForecasts[message.author.id]
             displayTable = table generateTable,
