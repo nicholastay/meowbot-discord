@@ -33,6 +33,15 @@ handler = exports.Command = (command, tail, message, isPM) ->
             Meowbot.Discord.voiceConnection.stopPlaying() # this will trigger the onStoppedPlaying() handler by default
             Meowbot.Discord.reply message, 'forcefully skipped the current playing track.'
 
+        when '~volume'
+            if isPM then if not Meowbot.Tools.userIsMod message then return
+            return Meowbot.Discord.reply message, 'you are not one of my masters, you can\'t tell me what to do!' if not Meowbot.Tools.userIsMod message
+            return Meowbot.Discord.reply message, 'you have specified an invalid volume (percentage).' if not /^(\d{1,2}|100)%?$/.test tail # Testing for two digit numbers/100 and optional %
+            toVolume = parseInt tail.replace('%', '')
+            Meowbot.HandlerSettings.Audio.Volume = toVolume / 100 # divide 100 as percentage to decimal
+            Meowbot.Logging.modLog 'Audio', "Audio encoder volume set to #{toVolume}%"
+            Meowbot.Discord.reply message, "the volume has been set to #{toVolume}%. *(Changes will be applied on the next track's playback.)*"
+
         when '~np'
             return Meowbot.Discord.reply message, 'you baka, I\'m not currently in a voice channel :3' if not Meowbot.Discord.voiceConnection
             return Meowbot.Discord.reply message, "the song that is currently playing is: **#{Meowbot.HandlerSettings.Audio.NP.name}** *(requested by: #{Meowbot.HandlerSettings.Audio.NP.requester.username})*" if Meowbot.HandlerSettings.Audio.NP
@@ -67,6 +76,7 @@ init = exports.Init = ->
     Meowbot.HandlerSettings.Audio.Stopped = true if not Meowbot.HandlerSettings.Audio.Stopped
     Meowbot.HandlerSettings.Audio.NP = null if not Meowbot.HandlerSettings.Audio.NP
     Meowbot.HandlerSettings.Audio.Queue = [] if not Meowbot.HandlerSettings.Audio.Queue
+    Meowbot.HandlerSettings.Audio.Volume = 0.35 if not Meowbot.HandlerSettings.Audio.Volume # 35% default volume
 
 intervals = exports.Intervals = [setInterval((-> checkIfStoppedPlaying()), 2000)]
 
@@ -93,5 +103,5 @@ addToQueue = (message, trackdata) ->
 
 playNextTrack = -> # This assumes there are songs in the queue!
     toPlay = Meowbot.HandlerSettings.Audio.NP = Meowbot.HandlerSettings.Audio.Queue.shift()
-    Meowbot.Discord.voiceConnection.playRawStream toPlay.stream
+    Meowbot.Discord.voiceConnection.playRawStream toPlay.stream, {volume: Meowbot.HandlerSettings.Audio.Volume}
     Meowbot.Discord.sendMessage Meowbot.HandlerSettings.Voice.UpdatesContext, "***Now Playing***: **#{toPlay.name}** *(requested by: #{toPlay.requester.username})*" if Meowbot.HandlerSettings.Voice.UpdatesContext
