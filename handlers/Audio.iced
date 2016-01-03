@@ -21,7 +21,7 @@ handler = exports.Command = (command, tail, message, isPM) ->
             songs = fs.readdirSync musicPath
             return Meowbot.Discord.reply message, 'this song is currently not in Nexerq\'s music library. You can ask him or try to play a song via YouTube.' if toPlaySong not in songs
             addToQueue message,
-                name: tail
+                name: '[MP3] ' + tail
                 stream: fs.createReadStream path.join musicPath, toPlaySong
                 requester: message.author
             # Meowbot.Discord.voiceConnection.playFile path.join musicPath, toPlaySong
@@ -67,7 +67,7 @@ handler = exports.Command = (command, tail, message, isPM) ->
             return Meowbot.Discord.reply message, 'invalid YouTube video link (in which case, why -_-), or I am having trouble connecting to YouTube.' if err
             friendlyName = if info.title and info.author then "#{info.title} (uploaded by #{info.author})" else "YouTube video ID #{ytVidID} [Was unable to retrieve metadata]"
             addToQueue message,
-                name: friendlyName
+                name: '[YT] ' + friendlyName
                 stream: ytdl.downloadFromInfo info, {quality: 140} # quality 140, code for audio
                 requester: message.author
 
