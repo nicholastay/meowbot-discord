@@ -10,7 +10,8 @@ init = exports.Init = ->
         Meowbot.Logging.modLog 'Commands', 'Commands (re)loaded from file.'
 
 mHandler = exports.Message = (message) ->
-    command = message.content.toLowerCase().substr 0, message.content.indexOf(' ')
+    spaceIndex = message.content.indexOf ' '
+    command = if spaceIndex is -1 then message.content.toLowerCase() else message.content.toLowerCase().substr 0, spaceIndex
     if commands[command] and message.author.id isnt Meowbot.Discord.user.id then Meowbot.Discord.sendMessage message, commands[command].output
 
 cHandler = exports.Command = (command, tail, message) ->
