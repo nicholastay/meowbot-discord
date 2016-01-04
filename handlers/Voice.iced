@@ -4,6 +4,7 @@ handler = exports.Command = (command, tail, message, isPM) ->
             return if not tail
             return Meowbot.Discord.sendMessage message, 'This command can only be used in the context of a server.' if isPM
             return Meowbot.Discord.reply message, 'you\'re not one of my masters, please don\'t force me to join a voice channel...' if not Meowbot.Tools.userIsMod message
+            return Meowbot.Discord.reply message, 'I\'m already in another voice channel, please disconnect me first to confirm this change please.' if Meowbot.Discord.voiceConnection
             voiceChannel = message.channel.server.channels.get 'name', tail
             return Meowbot.Discord.reply message, 'that is an invalid channel, don\'t force me into dark alleyways please.' if not voiceChannel
             return Meowbot.Discord.reply message, "#{tail} is not a voice channel. I can't scream in a text channel now, can I? :P" if voiceChannel.type isnt 'voice'
