@@ -1,9 +1,11 @@
 fs = require 'fs'
 path = require 'path'
 ytdl = require 'ytdl-core'
+request = require 'request'
 
 musicPath = path.join __dirname, '../', 'music'
 ytVidRegex = /((youtube\.com\/watch\?v=)|(youtu\.be\/))([A-Za-z0-9-_]+)/i
+scUrlRegex = /soundcloud\.com\/([\w-]+\/[\w-]+)/i
 
 handler = exports.Command = (command, tail, message, isPM) ->
     switch command
@@ -69,6 +71,24 @@ handler = exports.Command = (command, tail, message, isPM) ->
             addToQueue message,
                 name: '[YT] ' + friendlyName
                 stream: ytdl.downloadFromInfo info, {quality: 140} # quality 140, code for audio
+                requester: message.author
+
+        when 'playsc'
+            return if not Meowbot.Config.soundcloud?.clientId # SoundCloud not setup, assume disabled.
+            if isPM then if not Meowbot.Tools.userIsMod message then return
+            return Meowbot.Discord.reply message, 'you baka, I\'m not currently in a voice channel :3' if not Meowbot.Discord.voiceConnection
+            scUrlReg = scUrlRegex.exec tail
+            return Meowbot.Discord.reply message, 'invalid SoundCloud link, please...' if not scUrlReg
+            scUrlToResolve = scUrlReg[1]
+            await request "http://api.soundcloud.com/resolve?url=http://soundcloud.com/#{scUrlToResolve}&client_id=#{Meowbot.Config.soundcloud.clientId}", defer err, resp, body
+            return Meowbot.Discord.reply message, 'I could not reach SoundCloud\'s servers. Maybe try again later, or if it keeps happening ping Nexerq about it?' if err
+            return Meowbot.Discord.reply message, "there was a problem when I tried to reach SoundCloud. Please try again later, or maybe you\'ve tried too much and SoundCloud doesn\'t like us? (Error code: #{resp.statusCode})" if resp.statusCode isnt 200
+            scData = JSON.parse body
+            return Meowbot.Discord.reply message, "there was an error with finding the track data for your song. Maybe you spelt it wrong? (Error: #{if scData.errors[0] then scData.errors[0]['error_message'] else 'Unknown'})" if scData.errors
+            return Meowbot.Discord.reply message, 'for some reason, the track is not streamable off SoundCloud. Try a different song, or when it is able to be?' if not scData.streamable or not scData['stream_url']
+            addToQueue message,
+                name: '[SC] ' + "#{scData.title} (posted by #{scData.user.username})"
+                stream: request "#{scData['stream_url']}?client_id=#{Meowbot.Config.soundcloud.clientId}"
                 requester: message.author
 
 init = exports.Init = ->

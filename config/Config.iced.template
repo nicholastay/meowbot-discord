@@ -11,3 +11,5 @@ module.exports =
     githubwebhook:
         disabled: true # just dont use this feature or some shit if its too advanced
         secret: '' # secret from github webhook
+    soundcloud:
+        clientId: '' # SoundCloud client ID for resolving song streams. Remove this key entirely to disable soundcloud
