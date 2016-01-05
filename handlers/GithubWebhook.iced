@@ -8,7 +8,8 @@ init = exports.Init = ->
     return if Meowbot.Config.githubwebhook.disabled
     Meowbot.HandlerSettings.GithubWebhook = {} if not Meowbot.HandlerSettings.GithubWebhook
 
-    if not Meowbot.HandlerSettings.GithubWebhook.messageCtx and fs.existsSync saveFile # If file exists and theres no message context
+    await fs.access saveFile, fs.R_OK, defer fileErr
+    if not Meowbot.HandlerSettings.GithubWebhook.messageCtx and not fileErr # If file exists and theres no message context
         Meowbot.HandlerSettings.GithubWebhook.messageCtx = JSON.parse(fs.readFileSync saveFile).messageCtx
         Meowbot.Logging.modLog 'GitHub Webhook', 'Message context (re)loaded from file.'
 
