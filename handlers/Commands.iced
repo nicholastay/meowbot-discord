@@ -12,7 +12,7 @@ init = exports.Init = ->
 mHandler = exports.Message = (message) ->
     spaceIndex = message.content.indexOf ' '
     command = if spaceIndex is -1 then message.content.toLowerCase() else message.content.toLowerCase().substr 0, spaceIndex
-    if commands[command] and message.author.id isnt Meowbot.Discord.user.id then Meowbot.Discord.sendMessage message, commands[command].output
+    if commands[command] and message.author?.id isnt Meowbot.Discord.user.id then Meowbot.Discord.sendMessage message, commands[command].output
 
 cHandler = exports.Command = (command, tail, message) ->
     switch command
