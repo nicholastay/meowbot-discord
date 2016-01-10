@@ -15,6 +15,11 @@ replS = Meowbot.Repl = repl.start
     prompt: 'Meow> '
 console.log '\n'
 
+unsureModLog = (mod, msg) -> # ModLog when unsure if logging module is loaded or not
+    if Meowbot.Logging
+        Meowbot.Logging.modLog mod, msg
+    else
+        console.log "[#{mod}] #{msg}"
 # Core file loader
 reloadInternals = ->
     for module in fs.readdirSync './internal'
@@ -23,21 +28,18 @@ reloadInternals = ->
         if require.cache[require.resolve("./internal/#{module}")]
             delete Meowbot[moduleName]
             delete require.cache[require.resolve("./internal/#{module}")]
-            if Meowbot.Logging # the module may not have been loaded at this stage lol
-                Meowbot.Logging.modLog 'Internal', 'Unloaded internal module: ' + moduleName
-            else
-                console.log 'Unloaded internal module: ' + moduleName
-        Meowbot[moduleName] = require "./internal/#{module}"
-        if Meowbot.Logging
-            Meowbot.Logging.modLog 'Internal', 'Loaded internal module: ' + moduleName
-        else
-            console.log 'Loaded internal module: ' + moduleName
-    Meowbot.Logging.modLog 'Internal', 'Internal modules (re)loaded.'
+            unsureModLog 'Internal', 'Unloaded internal module: ' + moduleName
+        mod = Meowbot[moduleName] = require "./internal/#{module}"
+        unsureModLog 'Internal', 'Loaded internal module: ' + moduleName
+        if typeof mod.init is 'function'
+            mod.init()
+            unsureModLog 'Internal', 'Ran internal init script for: ' + moduleName
+    unsureModLog 'Internal', 'Internal modules (re)loaded.'
 
 reloadInternals() # Load core files
 Meowbot.ConfigLoader.reloadConfig() # Also make sure loaded
-Meowbot.MsgHandlers.reloadHandlers(true)
-Meowbot.DiscordLoader.login(true)
+Meowbot.MsgHandlers.reloadHandlers()
+Meowbot.DiscordLoader.login()
 
 replS.context.ch = Meowbot.CommandHandlers
 replS.context.mh = Meowbot.MessageHandlers

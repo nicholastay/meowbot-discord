@@ -4,6 +4,34 @@ path = require 'path'
 handlersPath = path.join __dirname, '../', 'handlers'
 
 
+onMessage = (message) -> # What to do on a message. Main basic parser.
+    isPM = message.channel instanceof require('discord.js').PMChannel
+    for handlerName, handler of Meowbot.MessageHandlers then handler message, isPM
+    if message.content[0] is (Meowbot.Config.commandPrefix or '!')
+        spaceIndex = message.content.indexOf ' '
+        command = message.content.toLowerCase().substr 1, (if spaceIndex is -1 then message.content.length else spaceIndex-1) # substr from without prefix to first space
+        tail = if spaceIndex is -1 then '' else message.content.substr spaceIndex+1, message.content.length # substr after space to end, also check if index is -1, -1 means couldnt find, so the person just did the command with no args
+        for handlerName, handler of Meowbot.CommandHandlers then handler(command, tail, message, isPM)
+
+exports.init = ->
+    # REPL command definitions
+    Meowbot.Repl.defineCommand 'rh',
+        help: 'Reload all message handlers'
+        action: reloadHandlers
+    Meowbot.Repl.defineCommand 'r',
+        help: 'Reload a message handler'
+        action: reloadHandler
+    Meowbot.Repl.defineCommand 'l',
+        help: 'Load a message handler'
+        action: loadHandler
+    Meowbot.Repl.defineCommand 'u',
+        help: 'Unload a message handler'
+        action: unloadHandler
+
+    # Refresh main event handler
+    Meowbot.Discord.removeListener 'message', onMessage
+    Meowbot.Discord.on 'message', onMessage
+
 exports.unloadHandler = unloadHandler = (handlerName) ->
     await fs.access "#{handlersPath}/#{handlerName}.iced", fs.R_OK, defer fileErr
     return Meowbot.Logging.modLog 'MsgHandlers', "Unable to unload handler '#{handlerName}', it proably was never loaded in the first place." if fileErr
@@ -36,29 +64,14 @@ exports.loadHandler = loadHandler = (handlerName) ->
         Meowbot.Logging.modLog 'MsgHandlers', 'Loaded intermeows for: ' + handlerName
 
 
-exports.reloadHandler = reloadHandler = (handlerName, firstRun) ->
+exports.reloadHandler = reloadHandler = (handlerName) ->
     return Meowbot.Logging.modLog 'MsgHandlers', 'No handler name specified for reload' if not handlerName
-    unloadHandler handlerName if not firstRun # No need to do this for first run
+    unloadHandler handlerName
     loadHandler handlerName
 
 
-exports.reloadHandlers = reloadHandlers = (firstRun) ->
-    if firstRun
-        Meowbot.Repl.defineCommand 'rh',
-            help: 'Reload all message handlers'
-            action: reloadHandlers
-        Meowbot.Repl.defineCommand 'r',
-            help: 'Reload a message handler'
-            action: reloadHandler
-        Meowbot.Repl.defineCommand 'l',
-            help: 'Load a message handler'
-            action: loadHandler
-        Meowbot.Repl.defineCommand 'u',
-            help: 'Unload a message handler'
-            action: unloadHandler
-            
+exports.reloadHandlers = reloadHandlers = ->   
     for handler in fs.readdirSync handlersPath
         continue if path.extname(handler) isnt '.iced'
-        reloadHandler handler.replace('.iced', ''), firstRun
-    return Meowbot.Logging.modLog 'MsgHandlers', 'Handlers reloaded.' if not firstRun
-    Meowbot.Logging.modLog 'MsgHandlers', 'Handlers loaded.'
+        reloadHandler handler.replace '.iced', ''
+    Meowbot.Logging.modLog 'MsgHandlers', 'Message handlers (re)loaded.'

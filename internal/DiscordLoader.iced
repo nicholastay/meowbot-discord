@@ -3,33 +3,28 @@ DiscordJS = require 'discord.js'
 discord = new DiscordJS.Client
     revive: true
 
-exports.login = login = (firstLogin) ->
-    if firstLogin # Create event handlers and assign stuff
-        discord.on 'ready', ->
-            Meowbot.Logging.modLog 'Discord', 'Logged in to Discord.'
-            discord.setStatus 'online', 'with Nexerq :3'
+onDisconnect = -> Meowbot.Logging.modLog 'Discord', 'Client was disconnected from Discord. Will try to relogin...'
+onRevive = -> Meowbot.Logging.modLog 'Discord', 'Client reconnected to Discord.'
+onReady = ->
+    Meowbot.Logging.modLog 'Discord', 'Logged in to Discord.'
+    discord.setStatus 'online', 'Neko Atsume: Kitty Collector'
 
-        discord.on 'message', (message) ->
-            isPM = message.channel instanceof DiscordJS.PMChannel
-            for handlerName, handler of Meowbot.MessageHandlers then handler(message, isPM)
+exports.init = ->
+    # REPL handlers
+    Meowbot.Discord = discord
+    Meowbot.Repl.context.discord = discord
+    Meowbot.Repl.context.d = discord
+    Meowbot.Repl.context.dc = logout
 
-            if message.content[0] is (Meowbot.Config.commandPrefix or '!')
-                spaceIndex = message.content.indexOf(' ')
-                command = message.content.toLowerCase().substr 1, (if spaceIndex is -1 then message.content.length else spaceIndex-1) # substr from without prefix to first space
-                tail = if spaceIndex is -1 then '' else message.content.substr spaceIndex+1, message.content.length # substr after space to end, also check if index is -1, -1 means couldnt find, so the person just did the command with no args
-                for handlerName, handler of Meowbot.CommandHandlers then handler(command, tail, message, isPM)
+    # Refresh event emitters
+    discord.removeListener 'ready', onReady
+    discord.removeListener 'disconnected', onDisconnect
+    discord.removeListener 'autoRevive', onRevive
+    discord.on 'ready', onReady
+    discord.on 'disconnected', onDisconnect
+    discord.on 'autoRevive', onRevive
 
-        discord.on 'disconnected', ->
-            Meowbot.Logging.modLog 'Discord', 'Client was disconnected from Discord. Will try to relogin...'
-
-        discord.on 'autoRevive', ->
-            Meowbot.Logging.modLog 'Discord', 'Client reconnected to Discord.'
-
-        Meowbot.Discord = discord
-        Meowbot.Repl.context.discord = discord
-        Meowbot.Repl.context.d = discord
-        Meowbot.Repl.context.dc = logout
-
+exports.login = login = ->
     discord.login Meowbot.Config.discord.username, Meowbot.Config.discord.password
     Meowbot.Logging.modLog 'Discord', 'Logging in to Discord...'
 

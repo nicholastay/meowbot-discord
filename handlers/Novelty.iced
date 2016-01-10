@@ -29,8 +29,8 @@ handler = exports.Command = (command, tail, message, isPM) ->
             love = Math.floor(seedrandom("#{message.author.username} <3 #{tail}")() * 100)
             return Meowbot.Discord.reply message, "the love between you and #{tail} is #{love}%! <3"
 
-        when 'lovechecking'
-            return if not isPM or not Meowbot.Tools.userIsMod message or not tail
+        when 'flove'
+            return if not Meowbot.Tools.userIsMod message or not tail # or not isPM
             names = tail.split '\n'
             return Meowbot.Discord.sendMessage message, "Not enough people mentioned" if names.length < 2
             love = Math.floor(seedrandom("#{names[0]} <3 #{names[1]}")() * 100)

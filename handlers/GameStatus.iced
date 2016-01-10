@@ -1,4 +1,4 @@
-gameIds = ['NEKOPARA VOL. 1', 'NEKOPARA VOL. 0', 'osu!', 'Sakura Clicker', 'Sakura Spirit']
+gameIds = ['NEKOPARA VOL. 1', 'NEKOPARA VOL. 0', 'osu!', 'Sakura Santa', 'Neko Atsume: Kitty Collector']
 
 intervals = exports.Intervals = [setInterval((-> changePlayingGameRand()), 10 * 60 * 1000)] # per 10 min change
 
