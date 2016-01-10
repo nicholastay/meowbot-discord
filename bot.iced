@@ -1,6 +1,11 @@
 repl = require 'repl'
 fs = require 'fs'
 
+# Object.assign() polyfill for discord.js itself, v0.12.x doesnt support such ES6 code
+if typeof Object.assign isnt 'function'
+    console.log '[Polyfill] Object.assign() not detected, assigning polyfill...'
+    do -> Object.assign = require('object.assign/polyfill')()
+
 Meowbot = global.Meowbot = new class
     constructor: ->
         @Config = {}
