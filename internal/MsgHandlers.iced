@@ -90,11 +90,15 @@ exports.loadHandler = loadHandler = (handlerName) ->
         Meowbot.Logging.modLog 'MsgHandlers', 'Loaded intermeows for: ' + handlerName
     if handl.Commands
         for cmdHandlerName, cmdHandler of handl.Commands
+            if Meowbot.Commands[cmdHandlerName]
+                Meowbot.Logging.modLog 'MsgHandlers', "Command '#{cmdHandlerName}' [from #{Meowbot.Commands[cmdHandlerName].fromModule}] already exists, it has not been loaded (from #{handlerName})."
+                continue
             if not cmdHandler.handler
                 Meowbot.Logging.modLog 'MsgHandlers', "Error loading (new) command handler: #{cmdHandlerName} [#{handlerName}] - no handler function"
                 continue
             Meowbot.Logging.modLog 'MsgHandlers', "warn: #{cmdHandlerName} [#{handlerName}] - no handler description" if not cmdHandler.description
             Meowbot.Commands[cmdHandlerName] = cmdHandler
+            Meowbot.Commands[cmdHandlerName].fromModule = handlerName
         Meowbot.Logging.modLog 'MsgHandlers', 'Loaded *new* style commands for: ' + handlerName
 
 
