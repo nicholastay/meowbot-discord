@@ -13,6 +13,32 @@ onMessage = (message) -> # What to do on a message. Main basic parser.
         tail = if spaceIndex is -1 then '' else message.content.substr spaceIndex+1, message.content.length # substr after space to end, also check if index is -1, -1 means couldnt find, so the person just did the command with no args
         for handlerName, handler of Meowbot.CommandHandlers then handler(command, tail, message, isPM)
 
+        # "New" command handler
+        # Current template handler:
+        # 'command':
+        #     description: 'This is a template command.'
+        #     blockPM: true # Block PMs
+        #     forceTailContent: true # Require the tail to have content
+        #     permissionLevel: 'mod/admin' # Optional
+        #     handler: (data, data, data) -> function
+        if Meowbot.Commands[command]
+            handlerData = Meowbot.Commands[command]
+            return Meowbot.Discord.sendMessage message, 'This command can only be used in the context of a server.' if handlerData.blockPM and isPM
+            return if handlerData.forceTailContent and not tail
+            switch handlerData.permissionLevel
+                when 'admin'
+                    if message.author.id in Meowbot.Config.admins
+                        handlerData.handler(command, tail, message, isPM)
+                    else 
+                        Meowbot.Discord.reply message, 'you are not an admin, you can\'t tell me exactly what to do!'
+                when 'mod'
+                    if Meowbot.Tools.userIsMod message
+                        handlerData.handler(command, tail, message, isPM)
+                    else
+                        Meowbot.Discord.reply message, 'you are not a mod, I can run around here all I want!'
+                else
+                    handlerData.handler(command, tail, message, isPM)
+
 exports.init = ->
     # REPL command definitions
     Meowbot.Repl.defineCommand 'rh',
@@ -62,6 +88,14 @@ exports.loadHandler = loadHandler = (handlerName) ->
     if handl.Intervals?
         Meowbot.HandlerIntervals[handlerName] = handl.Intervals
         Meowbot.Logging.modLog 'MsgHandlers', 'Loaded intermeows for: ' + handlerName
+    if handl.Commands
+        for cmdHandlerName, cmdHandler of handl.Commands
+            if not cmdHandler.handler
+                Meowbot.Logging.modLog 'MsgHandlers', "Error loading (new) command handler: #{cmdHandlerName} [#{handlerName}] - no handler function"
+                continue
+            Meowbot.Logging.modLog 'MsgHandlers', "warn: #{cmdHandlerName} [#{handlerName}] - no handler description" if not cmdHandler.description
+            Meowbot.Commands[cmdHandlerName] = cmdHandler
+        Meowbot.Logging.modLog 'MsgHandlers', 'Loaded *new* style commands for: ' + handlerName
 
 
 exports.reloadHandler = reloadHandler = (handlerName) ->

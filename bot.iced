@@ -11,6 +11,7 @@ Meowbot = global.Meowbot = new class
         @Config = {}
         @Discord = null
         @HandlerSettings = {} # Persistent handler settings across reloads
+        @Commands = {}
         @MessageHandlers = {}
         @CommandHandlers = {}
         @HandlerIntervals = {}
