@@ -1,8 +1,7 @@
 DiscordIO = require 'discord.io'
 path = require 'path'
 strftime = require 'fast-strftime'
-fs = require 'fs'
-rimraf = require 'rimraf'
+fs = require 'fs-extra'
 sanitize = require 'sanitize-filename'
 lame = require 'lame'
 
@@ -43,28 +42,30 @@ handler = exports.Command = (command, tail, message, isPM) ->
             return if not Meowbot.HandlerSettings.Recorder.Recording
             return if not Meowbot.Tools.userIsMod message
             Meowbot.Logging.modLog 'Recorder', 'Stopping recording and logging out DiscordIO client...'
-            Meowbot.HandlerSettings.Recorder.Recording.wstream.end()
-            Meowbot.HandlerSettings.Recorder.Client.on 'disconnected', -> Meowbot.HandlerSettings.Recorder.Client = null
             Meowbot.HandlerSettings.Recorder.Client.disconnect()
-            Meowbot.Logging.modLog 'Recorder', 'Encoding raw PCM dumped stream to Lame MP3...'
-            encoder = new lame.Encoder
-                # In settings
-                channels: 2
-                bitDepth: 16
-                sampleRate: 44100
+            Meowbot.HandlerSettings.Recorder.Client.on 'disconnected', ->
+                Meowbot.HandlerSettings.Recorder.Client = null
+                Meowbot.Logging.modLog 'Recorder', 'Encoding raw PCM dumped stream to Lame MP3...'
+                encoder = new lame.Encoder
+                    # In settings
+                    channels: 2
+                    bitDepth: 16
+                    sampleRate: 44100
 
-                # Out settings
-                bitRate: 128
-                outSampleRate: 22050
-                mode: lame.STEREO
-            rstream = fs.createReadStream path.join recordTo, (Meowbot.HandlerSettings.Recorder.Recording.filename + '.rawpcm')
-            wstream = fs.createWriteStream path.join recordTo, (Meowbot.HandlerSettings.Recorder.Recording.filename + '.mp3')
-            rstream.pipe encoder
-            encoder.pipe wstream
-            Meowbot.Logging.modLog 'Recorder', 'Finished encoding file to Lame MP3, now will clean up the raw file.'
-            rimraf path.resolve(recordTo, (Meowbot.HandlerSettings.Recorder.Recording.filename + '.rawpcm')), (err) ->
-                Meowbot.Logging.modLog 'Recorder', 'There was an error deleting the raw dumped file, you probably have to clean it up yourself.' if err
-            Meowbot.HandlerSettings.Recorder.Recording = null
+                    # Out settings
+                    bitRate: 128
+                    outSampleRate: 22050
+                    mode: lame.STEREO
+                rstream = fs.createReadStream path.join recordTo, (Meowbot.HandlerSettings.Recorder.Recording.filename + '.rawpcm')
+                wstream = fs.createWriteStream path.join recordTo, (Meowbot.HandlerSettings.Recorder.Recording.filename + '.mp3')
+                rstream.pipe encoder
+                encoder.pipe wstream
+                encoder.on 'end', ->
+                    Meowbot.Logging.modLog 'Recorder', 'Finished encoding file to Lame MP3, now will clean up the raw file.'
+                    fs.removeSync path.resolve(recordTo, (Meowbot.HandlerSettings.Recorder.Recording.filename + '.rawpcm')), (err) ->
+                        Meowbot.Logging.modLog 'Recorder', 'There was an error deleting the raw dumped file, you probably have to clean it up yourself.' if err
+                    Meowbot.HandlerSettings.Recorder.Recording.wstream.end()
+                    Meowbot.HandlerSettings.Recorder.Recording = null
 
 
 init = exports.Init = ->
