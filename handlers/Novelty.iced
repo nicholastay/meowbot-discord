@@ -21,7 +21,7 @@ ballResponses = ['it is certain',
                  'outlook not so good',
                  'very doubtful']
 
-handler = exports.Command = (command, tail, message) ->
+handler = exports.Commands =
     'love':
         description: 'Checks the love between you and someone(or -thing) else!'
         forceTailContent: true
