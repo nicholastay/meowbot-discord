@@ -8,11 +8,12 @@ changePlayingGameRand = ->
     changePlayingGame randomGame
     Meowbot.Logging.modLog 'Game Status', "Game randomly (out of the predefined) changed to: #{randomGame}"
 
-handler = exports.Command = (command, tail, message) ->
-    switch command
-        when 'changegame'
-            return Meowbot.Discord.reply message, 'you\'re not one of my masters, you can\'t tell me what to do! >.<' if not Meowbot.Tools.userIsMod message
-            return if not tail
+handler = exports.Commands = 
+    'changegame':
+        description: 'Changes the game that I am now playing.'
+        forceTailContent: true
+        permissionLevel: 'mod'
+        handler: (command, tail, message) ->
             switch tail
                 when 'random'
                     changePlayingGameRand()

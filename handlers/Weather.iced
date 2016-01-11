@@ -8,9 +8,10 @@ init = exports.Init = ->
     Meowbot.HandlerSettings.Weather = {} if not Meowbot.HandlerSettings.Weather
     Meowbot.HandlerSettings.Weather.UserForecasts = {} if not Meowbot.HandlerSettings.Weather.UserForecasts # My first try at contextual stuff
 
-handler = exports.Command = (command, tail, message) ->
-    switch command
-        when 'weather'
+handler = exports.Commands =
+    'weather':
+        description: 'Checks the weather for the given location. (defaults to Melbourne, Australia)'
+        handler: (command, tail, message) ->
             place = if tail then tail else 'Melbourne, Australia'
             await request apiUrl + makeSqlQuery(place), defer err, resp, body
             return Meowbot.Discord.reply message, 'there was a problem with contacting Yahoo Weather right now, please try again later.' if err or resp.statusCode isnt 200
@@ -29,7 +30,9 @@ handler = exports.Command = (command, tail, message) ->
             Meowbot.Discord.reply message, "the current weather #{friendlyTitle} is that it's #{friendlyText} with a temperature of #{temperature}°C.\n*(If you would like the forecast for the next five days, use #{(Meowbot.Config.commandPrefix or '!')}forecast.)*"
 
 
-        when 'forecast'
+    'forecast':
+        description: 'Checks the forecast contexually. (You must check the weather first)'
+        handler: (command, tail, message) ->
             return Meowbot.Discord.reply message, "there is no forecast data for you. Please request the weather (with #{(Meowbot.Config.commandPrefix or '!')}weather [location]) first." if not Meowbot.HandlerSettings.Weather.UserForecasts[message.author.id]?
             generateTable = [['Day', 'Description', 'Low', 'Top']]
             generateTable.push [day.day, day.text, day.low, day.high] for day in Meowbot.HandlerSettings.Weather.UserForecasts[message.author.id]

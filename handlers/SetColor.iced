@@ -1,12 +1,13 @@
 endsWith = require 'lodash.endswith'
 userTagRegex = /<@([0-9]+)>/
 
-handler = exports.Command = (command, tail, message, isPM) ->
-    switch command
-        when 'setcolor'
-            return Meowbot.Discord.sendMessage message, 'This command can only be used in the context of a server.' if isPM
-            return Meowbot.Discord.reply message, 'you\'re not one of my masters, you\'re not special enough (^:' if not Meowbot.Tools.userIsMod message
-
+handler = exports.Commands =
+    'setcolor':
+        description: 'Sets the color of a person.'
+        blockPM: true
+        forceTailContent: true
+        permissionLevel: 'mod'
+        handler: (command, tail, message) ->
             tailSplit = tail.split ' '
             color = tailSplit[0]
             userToLookup = tailSplit[1]
@@ -47,11 +48,12 @@ handler = exports.Command = (command, tail, message, isPM) ->
                 Meowbot.Discord.reply message, 'your new color has been set! Welcome to the kool kids kawaii gang! :D'
 
 
-
-        when 'setrolecolor'
-            return Meowbot.Discord.sendMessage message, 'This command can only be used in the context of a server.' if isPM
-            return Meowbot.Discord.reply message, 'you\'re not one of my masters, you\'re not special enough (^:' if not Meowbot.Tools.userIsMod message
-
+    'setrolecolor':
+        description: 'Sets the color of a role.'
+        blockPM: true
+        forceTailContent: true
+        permissionLevel: 'mod'
+        handler: (command, tail, message) ->
             roleName = tail.split ' '
             color = roleName.shift()
             roleName = roleName.join ' '

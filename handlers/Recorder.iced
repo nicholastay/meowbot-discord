@@ -8,11 +8,14 @@ lame = require 'lame'
 recordTo = path.resolve __dirname, '../', 'recordings'
 
 
-handler = exports.Command = (command, tail, message, isPM) ->
-    switch command
-        when 'rec'
-            return if not tail or isPM
-            return if not Meowbot.Tools.userIsMod message
+handler = exports.Commands =
+    'rec':
+        description: 'Starts recording a voice channel.'
+        hidden: true
+        blockPM: true
+        forceTailContent: true
+        permissionLevel: 'mod'
+        handler: (command, tail, message) ->
             voiceChannels = message.channel.server.channels.filter (channel) -> return channel.name is tail and channel.type is 'voice'
             return Meowbot.Discord.reply message, 'that is an invalid voice channel, don\'t force me into dark alleyways please.' if voiceChannels.length < 1
             voiceChannel = voiceChannels[0]
@@ -38,9 +41,12 @@ handler = exports.Command = (command, tail, message, isPM) ->
                 stream.on 'incoming', (ssrc, buffer) -> wstream.write buffer
             recordClient.connect()
 
-        when 'stoprec'
+    'stoprec':
+        description: 'Stops recording if already recording.'
+        hidden: true
+        permissionLevel: 'mod'
+        handler: (command, tail, message) ->
             return if not Meowbot.HandlerSettings.Recorder.Recording
-            return if not Meowbot.Tools.userIsMod message
             Meowbot.Logging.modLog 'Recorder', 'Stopping recording and logging out DiscordIO client...'
             Meowbot.HandlerSettings.Recorder.Client.disconnect()
             Meowbot.HandlerSettings.Recorder.Client.on 'disconnected', ->

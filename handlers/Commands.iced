@@ -14,11 +14,12 @@ mHandler = exports.Message = (message) ->
     command = if spaceIndex is -1 then message.content.toLowerCase() else message.content.toLowerCase().substr 0, spaceIndex
     if commands[command] and message.author?.id isnt Meowbot.Discord.user.id then Meowbot.Discord.sendMessage message, commands[command].output
 
-cHandler = exports.Command = (command, tail, message) ->
-    switch command
-        when 'addcom'
-            return Meowbot.Discord.reply message, 'you\'re not one of my masters, you can\'t tell me what to do! >.<' if not Meowbot.Tools.userIsMod message
-            return if not tail
+cHandler = exports.Commands =
+    'addcom':
+        description: 'Adds a command.'
+        forceTailContent: true
+        permissionLevel: 'mod'
+        handler: (command, tail, message) ->
             output = tail.split ' '
             return if output.length < 2
             commandToAdd = output.shift().toLowerCase()
@@ -31,9 +32,11 @@ cHandler = exports.Command = (command, tail, message) ->
             saveCommands()
             Meowbot.Discord.reply message, 'command most likely has been added...'
 
-        when 'delcom'
-            return Meowbot.Discord.reply message, 'you\'re not one of my masters, you can\'t tell me what to do! >.<' if not Meowbot.Tools.userIsMod message
-            return if not tail
+    'delcom':
+        description: 'Deletes a command.'
+        forceTailContent: true
+        permissionLevel: 'mod'
+        handler: (command, tail, message) ->
             output = tail.split ' '
             return if output.length < 1
             commandToDel = output.shift().toLowerCase()

@@ -18,6 +18,7 @@ onMessage = (message) -> # What to do on a message. Main basic parser.
         # 'command':
         #     description: 'This is a template command.'
         #     blockPM: true # Block PMs
+        #     hidden: true # Hide from ~help or something (future)
         #     forceTailContent: true # Require the tail to have content
         #     permissionLevel: 'mod/admin' # Optional
         #     handler: (data, data, data) -> function

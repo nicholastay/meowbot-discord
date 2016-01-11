@@ -59,12 +59,13 @@ createTunnel = (port) ->
             Meowbot.Tools.delay 60 * 1000, -> createTunnel()
             
 
-handler = exports.Command = (command, tail, message, isPM) ->
-    return if Meowbot.Config.githubwebhook.disabled
-
-    switch command
-        when 'gitupdates'
-            return Meowbot.Discord.sendMessage message, 'This command can only be used in the context of a server.' if isPM
+handler = exports.Commands = 
+    'gitupdates':
+        description: 'Changes the channel that GitHub updates from the webhook are sent to.'
+        blockPM: true
+        permissionLevel: 'admin'
+        handler: (command, tail, message) ->
+            return if Meowbot.Config.githubwebhook.disabled
             Meowbot.HandlerSettings.GithubWebhook.messageCtx = message.channel.id
             fs.writeFileSync saveFile, JSON.stringify({messageCtx: message.channel.id}), 'utf8'
             Meowbot.Discord.reply message, 'All GitHub commit updates will now be sent to this channel.'

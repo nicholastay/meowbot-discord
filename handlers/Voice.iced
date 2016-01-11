@@ -4,7 +4,7 @@ commands = exports.Commands =
         blockPM: true
         forceTailContent: true
         permissionLevel: 'mod'
-        handler: (command, tail, message, isPM) ->
+        handler: (command, tail, message) ->
             return Meowbot.Discord.reply message, 'I\'m already in another voice channel, please disconnect me first to confirm this change please.' if Meowbot.Discord.voiceConnection
             voiceChannels = message.channel.server.channels.filter (channel) -> return channel.name is tail and channel.type is 'voice'
             return Meowbot.Discord.reply message, 'that is an invalid voice channel, don\'t force me into dark alleyways please.' if voiceChannels.length < 1
