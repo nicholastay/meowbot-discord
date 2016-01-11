@@ -1,6 +1,7 @@
 fs = require 'fs'
 path = require 'path'
 lofilter = require 'lodash.filter'
+lostartswith = require 'lodash.startswith'
 
 handlersPath = path.join __dirname, '../', 'handlers'
 
@@ -8,10 +9,17 @@ handlersPath = path.join __dirname, '../', 'handlers'
 onMessage = (message) -> # What to do on a message. Main basic parser.
     isPM = message.channel instanceof require('discord.js').PMChannel
     for handlerName, handler of Meowbot.MessageHandlers then handler message, isPM
-    if message.content[0] is (Meowbot.Config.commandPrefix or '!')
-        spaceIndex = message.content.indexOf ' '
-        command = message.content.toLowerCase().substr 1, (if spaceIndex is -1 then message.content.length else spaceIndex-1) # substr from without prefix to first space
-        tail = if spaceIndex is -1 then '' else message.content.substr spaceIndex+1, message.content.length # substr after space to end, also check if index is -1, -1 means couldnt find, so the person just did the command with no args
+    msgLow = message.content.toLowerCase()
+    prefix = Meowbot.Config.commandPrefix or '!'
+    if lostartswith msgLow, prefix
+        msgNoPrefix = msgLow.replace prefix, ''
+        spaceIndex = msgNoPrefix.indexOf ' '
+        if spaceIndex is -1
+            command = msgNoPrefix
+            tail = ''
+        else
+            command = msgNoPrefix.substr 0, spaceIndex
+            tail = msgNoPrefix.substr spaceIndex+1, msgNoPrefix.length # +1 to negate space
         for handlerName, handler of Meowbot.CommandHandlers then handler(command, tail, message, isPM)
 
         # "New" command handler
