@@ -8,6 +8,7 @@ ytVidRegex = /((youtube\.com\/watch\?v=)|(youtu\.be\/))([A-Za-z0-9-_]+)/i
 scUrlRegex = /soundcloud\.com\/([\w-]+\/[\w-]+)/i
 
 handler = exports.Command = (command, tail, message, isPM) ->
+    return if Meowbot.HandlerSettings.Recorder?.Recording # Just completely terminate this section if something is recording
     switch command
         when 'mp3'
             songs = []

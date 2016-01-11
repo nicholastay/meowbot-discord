@@ -13,3 +13,6 @@ config/*.iced
 music/*.mp3
 handlers/Local.iced
 *.old
+recordings/*.mp3
+recordings/*.rawpcm
+tenc

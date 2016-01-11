@@ -1,3 +1,5 @@
 # MeowBot
 
-A chatbot for Discord written in (Iced)CoffeeScript/JS with the discord.js library
+A chatbot for Discord written in (Iced)CoffeeScript/JS with the discord.js library.
+
+Licensed under MIT.
