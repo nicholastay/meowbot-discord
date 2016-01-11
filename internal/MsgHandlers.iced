@@ -1,5 +1,6 @@
 fs = require 'fs'
 path = require 'path'
+lofilter = require 'lodash.filter'
 
 handlersPath = path.join __dirname, '../', 'handlers'
 
@@ -67,6 +68,8 @@ exports.unloadHandler = unloadHandler = (handlerName) ->
         delete Meowbot.CommandHandlers[handlerName] if Meowbot.CommandHandlers[handlerName]
         clearInterval i for i in Meowbot.HandlerIntervals[handlerName] if Meowbot.HandlerIntervals[handlerName]
         delete Meowbot.HandlerIntervals[handlerName] if Meowbot.HandlerIntervals[handlerName]
+        toDelete = lofilter Meowbot.Commands, (command) -> return command.fromModule is handlerName
+        delete Meowbot.Commands[command.name] for command in toDelete
         delete require.cache[require.resolve("#{handlersPath}/#{handlerName}.iced")]
         Meowbot.Logging.modLog 'MsgHandlers', 'Unloaded handler: ' + handlerName
 
@@ -99,6 +102,7 @@ exports.loadHandler = loadHandler = (handlerName) ->
                 continue
             Meowbot.Logging.modLog 'MsgHandlers', "warn: #{cmdHandlerName} [#{handlerName}] - no handler description" if not cmdHandler.description
             Meowbot.Commands[cmdHandlerName] = cmdHandler
+            Meowbot.Commands[cmdHandlerName].name = cmdHandlerName
             Meowbot.Commands[cmdHandlerName].fromModule = handlerName
         Meowbot.Logging.modLog 'MsgHandlers', 'Loaded *new* style commands for: ' + handlerName
 
