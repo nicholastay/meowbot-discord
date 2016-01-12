@@ -9,17 +9,16 @@ handlersPath = path.join __dirname, '../', 'handlers'
 onMessage = (message) -> # What to do on a message. Main basic parser.
     isPM = message.channel instanceof require('discord.js').PMChannel
     for handlerName, handler of Meowbot.MessageHandlers then handler message, isPM
-    msgLow = message.content.toLowerCase()
     prefix = Meowbot.Config.commandPrefix or '!'
-    if lostartswith msgLow, prefix
-        msgNoPrefix = msgLow.replace prefix, ''
+    if lostartswith message.content, prefix
+        msgNoPrefix = message.content.replace prefix, ''
         spaceIndex = msgNoPrefix.indexOf ' '
         if spaceIndex is -1
             command = msgNoPrefix
             tail = ''
         else
             command = msgNoPrefix.substr 0, spaceIndex
-            tail = msgNoPrefix.substr spaceIndex+1, msgNoPrefix.length # +1 to negate space
+            tail = msgNoPrefix.substr spaceIndex+1, message.content.length # +1 to negate space
         for handlerName, handler of Meowbot.CommandHandlers then handler(command, tail, message, isPM)
 
         # "New" command handler
