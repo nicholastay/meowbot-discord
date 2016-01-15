@@ -19,7 +19,6 @@ onMessage = (message) -> # What to do on a message. Main basic parser.
         else
             command = msgNoPrefix.substr 0, spaceIndex
             tail = msgNoPrefix.substr spaceIndex+1, message.content.length # +1 to negate space
-        for handlerName, handler of Meowbot.CommandHandlers then handler(command, tail, message, isPM)
 
         # "New" command handler
         # Current template handler:
@@ -72,7 +71,6 @@ exports.unloadHandler = unloadHandler = (handlerName) ->
     return Meowbot.Logging.modLog 'MsgHandlers', "Unable to unload handler '#{handlerName}', it proably was never loaded in the first place." if fileErr
     if require.cache[require.resolve("#{handlersPath}/#{handlerName}.iced")]
         delete Meowbot.MessageHandlers[handlerName] if Meowbot.MessageHandlers[handlerName]
-        delete Meowbot.CommandHandlers[handlerName] if Meowbot.CommandHandlers[handlerName]
         clearInterval i for i in Meowbot.HandlerIntervals[handlerName] if Meowbot.HandlerIntervals[handlerName]
         delete Meowbot.HandlerIntervals[handlerName] if Meowbot.HandlerIntervals[handlerName]
         toDelete = lofilter Meowbot.Commands, (command) -> return command.fromModule is handlerName
@@ -90,9 +88,6 @@ exports.loadHandler = loadHandler = (handlerName) ->
     if typeof handl.Message is 'function'
         Meowbot.MessageHandlers[handlerName] = handl.Message
         Meowbot.Logging.modLog 'MsgHandlers', 'Loaded meowssage handler: ' + handlerName
-    if typeof handl.Command is 'function'
-        Meowbot.CommandHandlers[handlerName] = handl.Command
-        Meowbot.Logging.modLog 'MsgHandlers', 'Loaded comeownd handler: ' + handlerName
     if typeof handl.Init is 'function'
         handl.Init()
         Meowbot.Logging.modLog 'MsgHandlers', 'Ran inyatialization script for: ' + handlerName

@@ -13,7 +13,6 @@ Meowbot = global.Meowbot = new class
         @HandlerSettings = {} # Persistent handler settings across reloads
         @Commands = {}
         @MessageHandlers = {}
-        @CommandHandlers = {}
         @HandlerIntervals = {}
 
 # REPL Session client
