@@ -20,16 +20,14 @@ handler = exports.Commands =
                 # defined a user
                 userTagMatch = userTagRegex.exec userToLookup
                 return Meowbot.Discord.reply message, 'invalid user, please define user with the @tag in Discord. :)' if not userTagMatch
-                userLookup = server.members.get 'id', userTagMatch[1] # Get by ID the user
-                return Meowbot.Discord.reply message, 'invalid user of this server. >.<' if not userLookup # returns null if not found
-                user = userLookup[0]
+                user = server.members.get 'id', userTagMatch[1] # Get by ID the user
+                return Meowbot.Discord.reply message, 'invalid user of this server. >.<' if not user # returns null if not found
 
             baseRoleName = 'customcolor_' + user.id
             existingRole = server.roles.get 'name', baseRoleName # Get role by name
             if existingRole
                 # Role already exists
-                role = existingRole[0]
-                await Meowbot.Discord.updateRole role,
+                await Meowbot.Discord.updateRole existingRole,
                     color: parseInt(color.replace '#', '0x')
                 , defer err
                 return Meowbot.Discord.reply message, 'there was an error updating the color, please try again later. :(' if err
@@ -61,8 +59,7 @@ handler = exports.Commands =
             server = message.channel.server
             role = server.roles.get 'name', roleName
             return Meowbot.Discord.reply message, 'invalid role for this server.' if not role
-            role = role[0]
-
+            
             await Meowbot.Discord.updateRole role,
                 color: parseInt(color.replace '#', '0x')
             , defer err
