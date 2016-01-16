@@ -19,7 +19,7 @@ handler = exports.Commands =
 
     'playmp3':
         description: 'Plays an mp3 (if available) over the connected voice channel.'
-        handler: (command, tail, message) ->
+        handler: (command, tail, message, isPM) ->
             return if Meowbot.HandlerSettings.Recorder?.Recording
             if isPM then if not Meowbot.Tools.userIsMod message then return # Do not allow other users to add songs privately via PM, just silently return. Check for PM first then check for Mod so dont have to check user as mod every msg
             return Meowbot.Discord.reply message, 'you baka, I\'m not currently in a voice channel :3' if not Meowbot.Discord.voiceConnection
@@ -35,7 +35,7 @@ handler = exports.Commands =
     'fskip':
         description: 'Forces skip of the currently playing track (if playing).'
         permissionLevel: 'mod'
-        handler: (command, tail, message) ->
+        handler: (command, tail, message, isPM) ->
             return if Meowbot.HandlerSettings.Recorder?.Recording
             if isPM then if not Meowbot.Tools.userIsMod message then return
             return Meowbot.Discord.reply message, 'you baka, I\'m not currently in a voice channel :3' if not Meowbot.Discord.voiceConnection
@@ -45,7 +45,7 @@ handler = exports.Commands =
     'volume':
         description: 'Sets the volume for the next playback.'
         permissionLevel: 'mod'
-        handler: (command, tail, message) ->
+        handler: (command, tail, message, isPM) ->
             if isPM then if not Meowbot.Tools.userIsMod message then return
             return Meowbot.Discord.reply message, 'you have specified an invalid volume (percentage).' if not /^(\d{1,2}|100)%?$/.test tail # Testing for two digit numbers/100 and optional %
             toVolume = parseInt tail.replace('%', '')
@@ -76,7 +76,7 @@ handler = exports.Commands =
 
     'playyt':
         description: 'Requests a YouTube video to be queued for playback.'
-        handler: (command, tail, message) ->
+        handler: (command, tail, message, isPM) ->
             return if Meowbot.HandlerSettings.Recorder?.Recording
             if isPM then if not Meowbot.Tools.userIsMod message then return
             return Meowbot.Discord.reply message, 'you baka, I\'m not currently in a voice channel :3' if not Meowbot.Discord.voiceConnection
@@ -93,7 +93,7 @@ handler = exports.Commands =
 
     'playsc':
         description: 'Requests a SoundCloud track to be queued for playback.'
-        handler: (command, tail, message) ->
+        handler: (command, tail, message, isPM) ->
             return if Meowbot.HandlerSettings.Recorder?.Recording
             return if not Meowbot.Config.soundcloud?.clientId # SoundCloud not setup, assume disabled.
             if isPM then if not Meowbot.Tools.userIsMod message then return
