@@ -2,6 +2,7 @@ repl = require 'repl'
 stream = require 'stream'
 lostartswith = require 'lodash.startswith'
 loendswith = require 'lodash.endswith'
+moment = require 'moment'
 
 mHandler = exports.Message = (message) ->
     return if not Meowbot.Tools.userIsMod message
@@ -56,6 +57,23 @@ cHandler = exports.Commands =
             Meowbot.Config.commandPrefix = tail
             Meowbot.Discord.reply message, "the command prefix was changed to '#{tail}' for as long as I am online."
 
+    'uptime':
+        description: 'Gets the uptime of the bot'
+        handler: (command, tail, message) ->
+            diff = moment().diff(moment(Meowbot.HandlerSettings.Admin.Uptime))
+            duration = moment.duration diff
+            # ok so this is some possibly 'closed api internal' stuff but it seems to work so... (_data)
+            formatted = ''
+            for k, v of duration._data # k = measure (seconds, milliseconds etc), v = length
+                continue if k is 'milliseconds' # dont care, too exact
+                if k is 'seconds' # first time, dont need the comma thing
+                    formatted = "#{v} #{k}"
+                    continue
+                if v is 0 and k is 'days' then break # 0 days, we dont need to go further, just h/m/s
+                formatted = "#{v} #{k}, " + formatted
+            Meowbot.Discord.sendMessage message, 'I have been up for: ' + formatted
+
 init = exports.Init = ->
     Meowbot.HandlerSettings.Admin = {} if not Meowbot.HandlerSettings.Admin
     Meowbot.HandlerSettings.Admin.REPLInstances = {} if not Meowbot.HandlerSettings.Admin.REPLInstances
+    Meowbot.HandlerSettings.Admin.Uptime = Date.now() if not Meowbot.HandlerSettings.Admin.Uptime
