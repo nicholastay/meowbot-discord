@@ -28,9 +28,22 @@ handler = exports.Commands =
             return Meowbot.Discord.reply message, 'this song is currently not in Nexerq\'s music library. You can ask him or try to play a song via YouTube.' if toPlaySong not in songs
             addToQueue message,
                 name: '[MP3] ' + tail
-                stream: fs.createReadStream path.join musicPath, toPlaySong
+                file: path.join musicPath, toPlaySong
                 requester: message.author
             # Meowbot.Discord.voiceConnection.playFile path.join musicPath, toPlaySong
+
+    'fplayfile':
+        description: 'Forces the use of playFile() to play a file (or a stream url)'
+        permissionLevel: 'mod'
+        hidden: true
+        handler: (command, tail, message, isPM) ->
+            return if Meowbot.HandlerSettings.Recorder?.Recording
+            if isPM then if not Meowbot.Tools.userIsMod message then return
+            return Meowbot.Discord.reply message, 'you baka, I\'m not currently in a voice channel :3' if not Meowbot.Discord.voiceConnection
+            addToQueue message,
+                name: '[F-FILE] ' + tail
+                file: tail
+                requester: message.author
 
     'fskip':
         description: 'Forces skip of the currently playing track (if playing).'
@@ -145,5 +158,11 @@ addToQueue = (message, trackdata) ->
 
 playNextTrack = -> # This assumes there are songs in the queue!
     toPlay = Meowbot.HandlerSettings.Audio.NP = Meowbot.HandlerSettings.Audio.Queue.shift()
-    Meowbot.Discord.voiceConnection.playRawStream toPlay.stream, {volume: Meowbot.HandlerSettings.Audio.Volume}
+    if toPlay.file # There is a file attribute
+        Meowbot.Discord.voiceConnection.playFile toPlay.file, {volume: Meowbot.HandlerSettings.Audio.Volume}
+    else if toPlay.stream
+        Meowbot.Discord.voiceConnection.playRawStream toPlay.stream, {volume: Meowbot.HandlerSettings.Audio.Volume}
+    else
+        Meowbot.Discord.sendMessage Meowbot.HandlerSettings.Voice.UpdatesContext, 'An invalid track was added to the queue, attempting a skip...'
+        return onStoppedPlaying() # Mimic a stop for a skip
     Meowbot.Discord.sendMessage Meowbot.HandlerSettings.Voice.UpdatesContext, "***Now Playing***: **#{toPlay.name}** *(requested by: #{toPlay.requester.username})*" if Meowbot.HandlerSettings.Voice.UpdatesContext
