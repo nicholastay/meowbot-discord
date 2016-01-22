@@ -60,6 +60,8 @@ handler = exports.Commands =
         permissionLevel: 'mod'
         handler: (command, tail, message, isPM) ->
             if isPM then if not Meowbot.Tools.userIsMod message then return
+            return Meowbot.Discord.reply message, "the current volume is set to #{Meowbot.HandlerSettings.Audio.Volume * 100}%." if not tail
+            return if not Meowbot.Tools.userIsMod message
             return Meowbot.Discord.reply message, 'you have specified an invalid volume (percentage).' if not /^(\d{1,2}|100)%?$/.test tail # Testing for two digit numbers/100 and optional %
             toVolume = parseInt tail.replace('%', '')
             Meowbot.HandlerSettings.Audio.Volume = toVolume / 100 # divide 100 as percentage to decimal
