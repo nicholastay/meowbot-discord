@@ -36,7 +36,7 @@
     "lodash.includes": "^3.1.3",
     "lodash.startswith": "^3.0.1",
     "moment": "^2.11.1",
-    "node-opus": "^0.1.11",
+    "node-opus": "github:nicholastay/node-opus#add-ia32",
     "object.assign": "^4.0.3",
     "request": "^2.67.0",
     "sanitize-filename": "^1.5.3",
