@@ -15,6 +15,7 @@ handler = exports.Commands =
             for song in fs.readdirSync musicPath
                 continue if path.extname(song) isnt '.mp3'
                 songs.push song.replace '.mp3', ''
+            return Meowbot.Discord.reply message, 'there are no songs available!' if songs.length < 1
             Meowbot.Discord.reply message, 'the available songs that Nexerq has put in his music library for me are: ' + songs.join ', '
 
     'playmp3':
