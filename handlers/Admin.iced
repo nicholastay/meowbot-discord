@@ -69,7 +69,7 @@ cHandler = exports.Commands =
                 if k is 'seconds' # first time, dont need the comma thing
                     formatted = "#{v} #{k}"
                     continue
-                if v is 0 and k is 'days' then break # 0 days, we dont need to go further, just h/m/s
+                break if v is 0 and k is ('days' or 'months' or 'years') # dont need to go further, just h/m/s
                 formatted = "#{v} #{k}, " + formatted
             Meowbot.Discord.sendMessage message, 'I have been up for: ' + formatted
 
